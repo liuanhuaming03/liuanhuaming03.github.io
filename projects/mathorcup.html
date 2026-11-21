@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathorCup 2024：电商货量预测与分仓规划 · 阮景怡</title>
+<meta name="description" content="预测 350 个品类未来三个月的库存与销量，再在仓容、产能和租金约束下用粒子群与遗传算法求分仓方案。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="../index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="../index.html#core">实习与项目</a><a href="../index.html#model">建模竞赛</a><a href="../index.html#contact">联系</a></nav>
+</div></header>
+<main>
+<div class="wrap crumbs"><a href="../index.html">作品集</a> / MathorCup 2024：电商货量预测与分仓规划</div>
+<section class="hero" style="padding-top:26px"><div class="wrap">
+<span class="eyebrow">建模竞赛</span>
+<h1 style="font-size:clamp(1.8rem,4.2vw,2.8rem)">MathorCup 2024：电商货量预测与分仓规划</h1>
+<p class="lead">预测 350 个品类未来三个月的库存与销量，再在仓容、产能和租金约束下用粒子群与遗传算法求分仓方案。</p>
+<div class="meta"><span><strong>奖项</strong>　二等奖（研究生组）</span><span><strong>赛道</strong>　MathorCup 大数据竞赛 · 赛道 B</span><span><strong>形式</strong>　团队</span></div>
+<div class="pill-row"><span class="pill">ARIMA</span><span class="pill">0-1 整数规划</span><span class="pill">粒子群算法</span><span class="pill">遗传算法</span><span class="pill">多目标优化</span></div>
+<div class="pill-row" style="margin-top:22px"><a class="btn primary" href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf">阅读论文 PDF</a></div>
+</div></section>
+<section class="block"><div class="wrap"><h2>背景与问题</h2><p class="lead" style="margin-top:10px">电商平台需要提前知道各品类的货量，才能决定商品放在哪个仓库。题目分三问：预测 350 个品类 7–9 月的库存量和每日销量；在“一品一仓”下做分仓；放宽到“一品最多三仓”并考虑品类关联。</p></div></section>
+<section class="block"><div class="wrap"><h2>整体流程</h2><ol class="flow" aria-label="流程"><li><b>数据预处理</b><span>异常值处理、线性插值补全、按周汇总销量</span></li><li><b>货量预测</b><span>ARIMA 预测月库存与周销量，再按历史分布拆成日销量</span></li><li><b>一品一仓</b><span>0-1 规划：最小化仓租，最大化仓容与产能利用率</span></li><li><b>一品多仓</b><span>放宽到最多三仓，加入品类关联度目标与惩罚项</span></li><li><b>算法求解</b><span>粒子群与遗传算法分别求解并比较</span></li></ol></div></section>
+<section class="block"><div class="wrap"><h2>团队的建模工作</h2><ul class="points" style="margin-top:12px"><li>数据预处理与货量预测：异常值处理、插值补全、按周汇总，用 ARIMA 做月库存和周销量预测，再按历史月内分布拆成日销量。</li><li>一品一仓：以品类分配路径为 0-1 决策变量，在仓容、产能约束下最小化仓租、最大化仓容和产能利用率。</li><li>一品多仓：放宽到每个品类最多三个仓，把品类关联度作为首要目标，约束违反用惩罚项处理。</li><li>用粒子群和遗传算法分别求解并比较结果，选择最优方案。</li></ul></div></section>
+<section class="block"><div class="wrap"><h2>关键设计与取舍</h2><div class="grid two" style="margin-top:14px"><div class="decision"><h3>预测和优化分两层</h3><p><span class="label">做法</span>先得到需求预测，再把预测量作为分仓优化的输入。</p><p><span class="label">原因与代价</span>两层各自可检验，但预测误差会传导到分仓决策，因此需要做情景和敏感性检查。</p></div></div></div></section>
+<section class="block"><div class="wrap"><h2>结果</h2><div class="stat-row" style="margin-top:14px"><div class="stat"><b>二等奖</b><span>MathorCup 大数据竞赛研究生组</span></div></div></div></section><section class="block"><div class="wrap"><div class="section-head"><h2>论文节选</h2><p><a href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf">下载完整论文 PDF</a></p></div><div class="paper-pages"><figure><a href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf"><img src="../assets/papers/mathorcup-p1.jpg" alt="摘要页" loading="lazy"></a><figcaption>摘要页</figcaption></figure><figure><a href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf"><img src="../assets/papers/mathorcup-p6.jpg" alt="问题分析与建模思路" loading="lazy"></a><figcaption>问题分析与建模思路</figcaption></figure><figure><a href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf"><img src="../assets/papers/mathorcup-p11.jpg" alt="货量预测结果" loading="lazy"></a><figcaption>货量预测结果</figcaption></figure><figure><a href="../assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf"><img src="../assets/papers/mathorcup-p22.jpg" alt="分仓模型求解" loading="lazy"></a><figcaption>分仓模型求解</figcaption></figure></div></div></section><div class="wrap next-prev"><a class="btn muted" href="mcm.html">← 美赛 2025：奥运奖牌数预测</a><a class="btn muted" href="tianchi.html">天池 Research Agent →</a></div></main><footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>

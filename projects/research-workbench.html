@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>研究工作台 · 阮景怡</title>
+<meta name="description" content="毕业论文的离线工作台：从 README、实验报告和数据台账自动生成，一页看清数据、实验进度、案例库和文献。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="../index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="../index.html#core">实习与项目</a><a href="../index.html#model">建模竞赛</a><a href="../index.html#contact">联系</a></nav>
+</div></header>
+<main>
+<div class="wrap crumbs"><a href="../index.html">作品集</a> / 研究工作台</div>
+<section class="hero" style="padding-top:26px"><div class="wrap">
+<span class="eyebrow">个人项目 · 科研与求职工作台（一）</span>
+<h1 style="font-size:clamp(1.8rem,4.2vw,2.8rem)">研究工作台</h1>
+<p class="lead">毕业论文的离线工作台：从 README、实验报告和数据台账自动生成，一页看清数据、实验进度、案例库和文献。</p>
+<div class="meta"><span><strong>形式</strong>　单文件离线 HTML，双击即开</span><span><strong>构建</strong>　Python 脚本同步进度并生成页面</span><span><strong>模块</strong>　7 个</span></div>
+<div class="pill-row"><span class="pill">数据可视化</span><span class="pill">自动化构建</span><span class="pill">研究管理</span><span class="pill">原生 JavaScript</span></div>
+<div class="pill-row" style="margin-top:22px"></div>
+</div></section>
+<div class="wrap" style="padding-top:22px"><p class="note">工作台里是未答辩论文的实验数据，这里先只放截图，可交互版本暂不公开。</p></div><section class="block"><div class="wrap"><h2>背景与问题</h2><p class="lead" style="margin-top:10px">论文推进过程中，数据说明、实验批次、结果报告、论文稿和文献分散在几百个文件里，每次讨论都要重新翻找，也容易把“跑完了”误当成“结论成立”。</p></div></section>
+<section class="block"><div class="wrap"><h2>整体流程</h2><ol class="flow" aria-label="流程"><li><b>唯一进度入口</b><span>根目录 README 与决策记录</span></li><li><b>同步脚本</b><span>提取进度、实验清单、论文进度，登记来源哈希</span></li><li><b>构建脚本</b><span>生成数据中心、实验、案例库等页面数据</span></li><li><b>离线页面</b><span>7 个模块，单文件可直接打开</span></li></ol></div></section>
+<section class="block"><div class="wrap"><h2>我做了什么</h2><ul class="points" style="margin-top:12px"><li>设计 7 个模块：研究总览、数据中心、实验进度与结果、论文阅读与进度、案例知识库、参考文献、版本与来源。</li><li>编写同步与构建脚本：进度只从唯一入口读取并登记来源哈希，页面不另外维护一份进度，避免两处不一致。</li><li>在页面上把“运行完成”“已复核”“科学结论”分开标注，运行完成不等于通过检验。</li><li>数据中心逐列解释字段、单位与适用边界；案例库支持按来源、主体和时段筛选并查看近邻示例。</li></ul></div></section>
+<section class="block"><div class="wrap"><h2>关键设计与取舍</h2><div class="grid two" style="margin-top:14px"><div class="decision"><h3>页面由脚本生成，不手工维护</h3><p><span class="label">做法</span>同步脚本读取唯一的进度入口，构建脚本输出页面数据。</p><p><span class="label">原因与代价</span>手工维护的看板很快会和真实进度脱节；代价是新增议题或改变实验阶段时，需要同步更新脚本里的映射。</p></div><div class="decision"><h3>做成单文件离线页面</h3><p><span class="label">做法</span>数据内嵌在页面里，不依赖后端服务。</p><p><span class="label">原因与代价</span>组会、答疑时双击就能打开，也方便发给导师；代价是数据是某一时刻的快照，需要重新构建才能更新。</p></div></div></div></section>
+<section class="block"><div class="wrap"><h2>界面截图</h2><div class="shots" style="margin-top:14px"><figure><a href="../assets/shots/research-overview.jpg"><img src="../assets/shots/research-overview.jpg" alt="研究总览：当前进度、机制与结论分开标注" loading="lazy"></a><figcaption>研究总览：当前进度、机制与结论分开标注</figcaption></figure><figure><a href="../assets/shots/research-data.jpg"><img src="../assets/shots/research-data.jpg" alt="数据中心：按论文章节查看实验输入" loading="lazy"></a><figcaption>数据中心：按论文章节查看实验输入</figcaption></figure><figure><a href="../assets/shots/research-cases.jpg"><img src="../assets/shots/research-cases.jpg" alt="案例知识库：版本、来源质量与近邻示例" loading="lazy"></a><figcaption>案例知识库：版本、来源质量与近邻示例</figcaption></figure><figure><a href="../assets/shots/research-experiments.jpg"><img src="../assets/shots/research-experiments.jpg" alt="实验进度与结果" loading="lazy"></a><figcaption>实验进度与结果</figcaption></figure></div></div></section><div class="wrap next-prev"><a class="btn muted" href="thesis.html">← 能源产消者 P2P 交易决策（硕士论文）</a><a class="btn muted" href="career-workbench.html">求职工作台 →</a></div></main><footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>

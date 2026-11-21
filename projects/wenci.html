@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文辞 AI 小说生成工作台 · 阮景怡</title>
+<meta name="description" content="把长篇小说生成拆成“拆解 → 改编 → 逐章重写”三段工作流，每章先检索参考片段、生成场景卡，再写正文。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="../index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="../index.html#core">实习与项目</a><a href="../index.html#model">建模竞赛</a><a href="../index.html#contact">联系</a></nav>
+</div></header>
+<main>
+<div class="wrap crumbs"><a href="../index.html">作品集</a> / 文辞 AI 小说生成工作台</div>
+<section class="hero" style="padding-top:26px"><div class="wrap">
+<span class="eyebrow">实习 · 杭州龙特星辰科技</span>
+<h1 style="font-size:clamp(1.8rem,4.2vw,2.8rem)">文辞 AI 小说生成工作台</h1>
+<p class="lead">把长篇小说生成拆成“拆解 → 改编 → 逐章重写”三段工作流，每章先检索参考片段、生成场景卡，再写正文。</p>
+<div class="meta"><span><strong>时间</strong>　2026.03 – 2026.06</span><span><strong>角色</strong>　AI 算法实习生</span><span><strong>负责</strong>　长文本重写链路与检索增强</span></div>
+<div class="pill-row"><span class="pill">长文本生成</span><span class="pill">检索增强</span><span class="pill">工作流编排</span><span class="pill">Flask</span><span class="pill">全栈联调</span></div>
+<div class="pill-row" style="margin-top:22px"><a class="btn primary" href="../demos/wenci/index.html">在线演示：真实前端界面</a></div>
+</div></section>
+<div class="wrap" style="padding-top:22px"><p class="note">工作台源码属于实习公司，这里只公开界面演示。演示使用的是公司项目的真实前端，后端换成了本地示例数据：小说、参考片段都是为演示原创的文本，不调用模型。</p></div><section class="block"><div class="wrap"><h2>背景与问题</h2><p class="lead" style="margin-top:10px">从一段梗概一次性生成长篇，结构容易松散，人物状态前后不一致；只调提示词时，很难判断问题出在“没检索到合适的参考”，还是“检索到了但生成没用上”。工作台要让编辑能一步步检查、修改、局部重跑。</p></div></section>
+<section class="block"><div class="wrap"><h2>整体流程</h2><ol class="flow" aria-label="流程"><li><b>AI 拆解</b><span>原文 → 标准化框架（梗概、结构、人物小传、钩子）</span></li><li><b>AI 改编</b><span>选择世界观、题材、核心场景，替换人物，生成新大纲</span></li><li><b>故事蓝图</b><span>核心冲突、情绪曲线、章节计划</span></li><li><b>逐章检索</b><span>按章节功能构造多路查询，召回后融合、重排</span></li><li><b>场景卡</b><span>开场切入、关键拍点、章尾钩子</span></li><li><b>生成与交接</b><span>逐章生成、润色，章节摘要传给下一章</span></li></ol></div></section>
+<section class="block"><div class="wrap"><h2>我做了什么</h2><ul class="points" style="margin-top:12px"><li>负责第三阶段“逐章重写”链路：故事蓝图、章节计划、场景卡、逐章生成与章节摘要交接，让每一章都有明确的输入和可检查的中间产物。</li><li>实现检索增强：按“对话 / 动作 / 情绪 / 环境 / 钩子”等章节功能构造多路查询，稠密语义召回与词项召回结合，用 RRF 融合后再按标签和来源重排。</li><li>为每章记录查询、候选、最终注入的片段和生成结果，用同一个任务 ID 串起来，定位问题时先找第一个偏离预期的环节。</li><li>参与把写作引擎接入工作台：Flask 后端通过 subprocess + JSON 桥接独立引擎，正文生成以异步任务运行，前端轮询任务状态。</li><li>参与前后端联调，以及章节保存、单章重生成、选中段落改写等编辑功能的接口对接。</li></ul></div></section>
+<section class="block"><div class="wrap"><h2>关键设计与取舍</h2><div class="grid two" style="margin-top:14px"><div class="decision"><h3>分章生成，而不是一次写完整本</h3><p><span class="label">做法</span>蓝图 → 章节计划 → 场景卡 → 正文，每层都能人工修改后再往下走。</p><p><span class="label">原因与代价</span>每一轮输出有边界，局部出错可以只重跑一章；代价是调用次数更多、章节之间有串行依赖，所以需要章节摘要做状态交接，并控制前一章的错误向后传。</p></div><div class="decision"><h3>把“检索到”和“用上了”分开看</h3><p><span class="label">做法</span>日志分别记录候选片段和最终进入提示词的片段。</p><p><span class="label">原因与代价</span>候选里有、注入里没有，说明问题在过滤或上下文预算；注入了却没体现在正文里，问题才在提示词或生成。这样调优有方向，不只是反复改提示词。</p></div><div class="decision"><h3>长任务异步化，前端轮询</h3><p><span class="label">做法</span>启动任务立即返回 job_id，前端每 1.8 秒拉一次状态，逐章显示进度。</p><p><span class="label">原因与代价</span>整本生成耗时较长，同步请求会超时；异步任务还能在刷新页面后按任务 ID 找回进度。</p></div></div></div></section>
+<section class="block"><div class="wrap"><h2>界面截图</h2><div class="shots" style="margin-top:14px"><figure><a href="../assets/shots/wenci-adapt.jpg"><img src="../assets/shots/wenci-adapt.jpg" alt="第二步：改编设定（世界观、题材、核心场景、人物）" loading="lazy"></a><figcaption>第二步：改编设定（世界观、题材、核心场景、人物）</figcaption></figure><figure><a href="../assets/shots/wenci-write.jpg"><img src="../assets/shots/wenci-write.jpg" alt="第三步：逐章生成，右侧是本章场景卡和检索到的参考片段" loading="lazy"></a><figcaption>第三步：逐章生成，右侧是本章场景卡和检索到的参考片段</figcaption></figure></div></div></section><section class="block qa"><div class="wrap"><h2>常见追问</h2><div style="margin-top:14px"><details><summary>日志里检索到了目标片段，为什么生成还是没用上？</summary><p>先看这段文字最终有没有进入模型输入：候选会按用途排序、去重，再受总字符预算限制，所以“候选里有”和“注入了”是两个不同的观察。已经注入的话，再检查提示词和生成输出。</p></details><details><summary>Dense、Sparse、RRF 分别起什么作用？</summary><p>稠密召回补语义相近的片段，词项召回补精确的设定和说法；两路分数尺度不同，RRF 只用排名融合，避免直接比较分数。融合后再按章节功能和标签做业务重排。</p></details></div></div></section><div class="wrap next-prev"><a class="btn muted" href="tianchi.html">← 天池 Research Agent</a><a class="btn muted" href="thesis.html">能源产消者 P2P 交易决策（硕士论文） →</a></div></main><footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>

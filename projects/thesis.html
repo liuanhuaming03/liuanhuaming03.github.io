@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>能源产消者 P2P 交易决策（硕士论文） · 阮景怡</title>
+<meta name="description" content="多类能源产消者的点对点交易仿真：强化学习做策略，案例检索提供先验，大模型只提出候选、由程序把关。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="../index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="../index.html#core">实习与项目</a><a href="../index.html#model">建模竞赛</a><a href="../index.html#contact">联系</a></nav>
+</div></header>
+<main>
+<div class="wrap crumbs"><a href="../index.html">作品集</a> / 能源产消者 P2P 交易决策（硕士论文）</div>
+<section class="hero" style="padding-top:26px"><div class="wrap">
+<span class="eyebrow">硕士毕业论文 · 在研</span>
+<h1 style="font-size:clamp(1.8rem,4.2vw,2.8rem)">能源产消者 P2P 交易决策（硕士论文）</h1>
+<p class="lead">多类能源产消者的点对点交易仿真：强化学习做策略，案例检索提供先验，大模型只提出候选、由程序把关。</p>
+<div class="meta"><span><strong>状态</strong>　在研（2027 届毕业论文）</span><span><strong>数据</strong>　以大连分时电价结构为参考的合成数据</span><span><strong>工具</strong>　Python · 仿真环境 · 研究工作台</span></div>
+<div class="pill-row"><span class="pill">多智能体强化学习</span><span class="pill">案例检索</span><span class="pill">LLM 决策安全</span><span class="pill">实验设计</span></div>
+<div class="pill-row" style="margin-top:22px"><a class="btn primary" href="../projects/research-workbench.html">配套的研究工作台</a></div>
+</div></section>
+<div class="wrap" style="padding-top:22px"><p class="note">论文尚未答辩，这里只介绍研究设计与工程结构，不公开论文正文和未发表的实验数值。</p></div><section class="block"><div class="wrap"><h2>背景与问题</h2><p class="lead" style="margin-top:10px">社区里的光伏用户、储能用户、普通负荷等产消者偏好不同，需要在电价、设备和市场规则的约束下互相买卖电。研究问题是：学习机制、历史案例先验，以及大模型给出的建议，分别会怎样影响主体的行为和系统的整体损失。</p></div></section>
+<section class="block"><div class="wrap"><h2>整体流程</h2><ol class="flow" aria-label="流程"><li><b>建模</b><span>主体状态、动作、市场与设备约束、收益</span></li><li><b>策略学习</b><span>平均场多智能体强化学习作为基线</span></li><li><b>案例检索</b><span>相似状态下的历史动作作为先验</span></li><li><b>候选与门控</b><span>大模型提出候选，程序校验结构、范围与约束，不通过就回退</span></li><li><b>配对实验</b><span>固定种子与输入，对照组逐一比较</span></li><li><b>证据结论</b><span>只写有实验支持的结论</span></li></ol></div></section>
+<section class="block"><div class="wrap"><h2>我做了什么</h2><ul class="points" style="margin-top:12px"><li>搭建产消者 P2P 交易仿真环境：主体状态、动作空间、市场出清规则与设备约束，并整理合成数据的口径说明。</li><li>实现平均场多智能体强化学习基线，以及基于案例检索的经验先验。</li><li>设计“提出—准入—执行”分离的决策链路：大模型只提出候选，程序检查结构、动作范围和物理/收益约束，不通过就回退到规则或数值基线；三步分别留日志。</li><li>按研究问题冻结方案、种子和输入，做种子级配对对照，并为每批实验登记来源与审计记录。</li><li>开发配套的研究工作台，把数据、实验进度、案例库和文献集中到一个离线页面里。</li></ul></div></section>
+<section class="block"><div class="wrap"><h2>关键设计与取舍</h2><div class="grid two" style="margin-top:14px"><div class="decision"><h3>大模型只能“提建议”，不能直接执行</h3><p><span class="label">做法</span>所有候选都要过结构校验、动作范围和约束检查。</p><p><span class="label">原因与代价</span>能源调度动作有物理和收益约束，不能让语言输出越过这些约束；代价是链路更长，需要单独证明候选相对数值基线是否真的有增益。</p></div><div class="decision"><h3>把每个主张拆成可检验的对照</h3><p><span class="label">做法</span>例如“语言反馈有独立增益”，就要在固定数值先验和候选规则的前提下单独比较。</p><p><span class="label">原因与代价</span>总体指标改善可能来自别的组件。论文只写有对照实验支持的结论，尚未获得支持的假设如实保留为待验证。</p></div></div></div></section>
+<section class="block qa"><div class="wrap"><h2>常见追问</h2><div style="margin-top:14px"><details><summary>为什么用平均场方法？</summary><p>主体数量多且同类主体行为相近时，用邻居群体的平均行为近似相互作用，可以显著降低建模复杂度；是否适用要看主体异质性，所以需要和独立策略等基线对比。</p></details><details><summary>怎么保证模型建议不会破坏系统？</summary><p>先做结构校验，再检查参数边界、动作范围和约束；通过后也按有限步长执行并持续监控，任何一步不通过都回退到基线策略。</p></details></div></div></section><div class="wrap next-prev"><a class="btn muted" href="wenci.html">← 文辞 AI 小说生成工作台</a><a class="btn muted" href="research-workbench.html">研究工作台 →</a></div></main><footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>

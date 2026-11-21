@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#152426" />
+    <title>求职工作台 · 在线演示</title>
+    <link rel="stylesheet" href="styles.css?v=20261110-green" />
+    <link rel="stylesheet" href="theme.css?v=20261110-green" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#career" aria-label="秋招工作台首页">
+        <span class="brand-mark"><img src="icons/bar-chart-fill.svg" alt="" /></span>
+        <span><strong>秋招工作台</strong><small>CAREER OPERATIONS</small></span>
+      </a>
+      <nav class="nav" aria-label="工作台页面">
+        <span class="nav-group">求职导航</span>
+        <button data-view="overview"><img src="icons/grid-1x2.svg" alt="" /><span>今日总览</span></button>
+        <button class="active" data-view="career"><img src="icons/briefcase.svg" alt="" /><span>岗位投递</span></button>
+        <button data-view="resumes"><img src="icons/file-earmark-person.svg" alt="" /><span>简历素材</span></button>
+        <button data-view="obsidian"><img src="icons/journal-text.svg" alt="" /><span>学习笔记</span></button>
+        <button data-view="progress"><img src="icons/check2-square.svg" alt="" /><span>求职任务</span></button>
+      </nav>
+      <div class="server-card">
+        <span class="local-indicator">本机求职工作台</span>
+        <p class="sidebar-motto">投递有进度<br>准备有方向</p>
+        <details><summary>秋招资料目录</summary><code id="projectRoot">加载中</code></details>
+        <div class="sidebar-quick-actions"><a href="#overview">今日</a><a href="#progress">任务</a><a href="#resumes">简历</a></div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="utilitybar">
+        <div class="breadcrumb"><span>我的秋招</span><span class="breadcrumb-separator">/</span><strong id="currentPageLabel">岗位投递</strong></div>
+        <div class="utility-actions"><span id="workspaceDate"></span><button id="refreshBtn" class="secondary">刷新数据</button></div>
+      </header>
+      <main class="main">
+        <header class="topbar">
+          <div><span class="page-eyebrow">CAREER WORKSPACE</span><h1 id="viewTitle">岗位投递</h1><p id="viewSubtitle">维护岗位投递、测评、笔试、面试和 Offer 状态。</p></div>
+          <a id="pagePrimaryAction" class="page-action link-button" href="#resumes">简历素材</a>
+        </header>
+        <section id="notice" class="notice hidden" role="status" aria-live="polite"></section>
+        <section id="content" class="content"></section>
+        <footer class="workspace-footer">本机秋招工作台 · 跟进岗位进度，积累求职准备。</footer>
+      </main>
+    </div>
+    <script src="mock-api.js"></script>
+    <script src="app.js?v=20261110-green"></script>
+    <div style="position:fixed;z-index:9999;right:16px;bottom:16px;background:#152426;color:#e8f5c8;padding:8px 14px;border-radius:8px;font:13px/1.5 system-ui;box-shadow:0 4px 14px rgba(0,0,0,.2)">在线演示 · 数据为虚构示例，修改只在当前页面生效 · <a href="../../projects/career-workbench.html" style="color:#c6f36b">返回项目页</a></div>
+  </body>
+</html>

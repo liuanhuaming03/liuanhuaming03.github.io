@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天池 Research Agent · 运行轨迹演示</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+.demo{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;margin-top:18px}
+@media (max-width:880px){.demo{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel h3{margin-bottom:10px}
+.cases{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.cases button[aria-pressed=true]{background:var(--accent);color:#fff}
+.q{font-size:15px;margin:10px 0 2px}
+.q b{color:var(--accent)}
+.budget{margin:14px 0 6px;height:12px;border-radius:99px;background:#e8ebe2;overflow:hidden;position:relative}
+.budget i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#3b7d5a,#b8e06a);transition:width .12s linear}
+.budget.warn i{background:linear-gradient(90deg,#c27c22,#e6b450)}
+.budget-label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.steps{list-style:none;padding:0;margin:14px 0 0}
+.steps li{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-top:1px dashed var(--line);opacity:.45;transition:opacity .2s}
+.steps li.on,.steps li.done,.steps li.skip,.steps li.fail{opacity:1}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;margin-top:2px}
+li.on .dot{border-color:var(--accent);background:#fff;animation:pulse 1s infinite}
+li.done .dot{background:var(--accent);border-color:var(--accent)}
+li.skip .dot{background:#c9cfc3;border-color:#c9cfc3}
+li.fail .dot{background:#b44c2b;border-color:#b44c2b}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(35,83,60,.15)}}
+.steps .t{font-weight:600}
+.steps .d{font-size:13.5px;color:var(--muted)}
+.steps .ms{font:12px var(--mono);color:var(--muted);white-space:nowrap}
+.answer{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);font-weight:600;display:none}
+.answer.unknown{background:#f6e7df;color:#8a3a1d}
+.sse{background:#17201b;color:#d5e6cf;border-radius:10px;padding:12px;font:12.5px/1.55 var(--mono);height:420px;overflow:auto;white-space:pre-wrap}
+.sse .ping{color:#7f9a87}
+.sse .msg{color:#d9f99d}
+.sse .sys{color:#f2b880}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.legend{font-size:13px;color:var(--muted);margin-top:8px}
+.code-ref{font:12.5px var(--mono);color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="topnav"><div class="wrap"><a class="brand" href="../../index.html">阮景怡<small>项目作品集</small></a><nav><a href="../../projects/tianchi.html">返回项目页</a></nav></div></header>
+<main class="wrap" style="padding:28px 0 40px">
+<span class="eyebrow">交互演示 · 回放</span>
+<h1 style="font-size:clamp(1.7rem,4vw,2.5rem)">一次问答在 55 秒内怎么走</h1>
+<p class="lead">选一道题，看主流程如何在时限内决定直答、检索还是放弃，右侧是 <code>/answer</code> 接口实际发出的 SSE 事件。题目和搜索结果均为虚构，流程、超时参数和事件格式与提交版本代码一致；时间按 4 倍速回放。</p>
+
+<div class="demo">
+<section class="panel" aria-labelledby="h-run">
+<h3 id="h-run">运行轨迹（Harness）</h3>
+<div class="cases" role="group" aria-label="选择题目">
+<button class="btn" data-case="direct" aria-pressed="true">① 直答通过</button>
+<button class="btn" data-case="search" aria-pressed="false">② 检索回退 + 二跳</button>
+<button class="btn" data-case="timeout" aria-pressed="false">③ 预算耗尽</button>
+</div>
+<p class="q" id="question"></p>
+<div class="budget" id="budget"><i></i></div>
+<div class="budget-label"><span id="elapsed">已用 0.0 s</span><span>总时限 ASK_HARD_TIMEOUT_SECONDS = 55 s</span></div>
+<ol class="steps" id="steps"></ol>
+<div class="answer" id="answer"></div>
+<div class="controls">
+<button class="btn primary" id="run">▶ 运行</button>
+<button class="btn" id="disconnect" disabled>模拟客户端断开</button>
+</div>
+<p class="legend">● 绿色：完成　● 灰色：按条件跳过　● 红色：超时或未通过校验</p>
+</section>
+
+<section class="panel" aria-labelledby="h-sse">
+<h3 id="h-sse">SSE 事件流</h3>
+<div class="sse" id="sse" aria-live="polite"></div>
+<p class="legend">Ping 事件只表示连接仍在，最终答案通过 <code>Message</code> 事件返回。客户端断开时服务端捕获取消，并取消后台答题任务。</p>
+<p class="code-ref">对应代码：SSE_PING_EVENT_NAME = "Ping"，SSE_FINAL_EVENT_NAME = "Message"，演示里心跳每 15 秒一次（SSE_PING_INTERVAL_SECONDS）</p>
+</section>
+</div>
+<p style="margin-top:22px"><a class="btn muted" href="../../projects/tianchi.html">← 返回项目页</a> <a class="btn muted" href="https://github.com/liuanhuaming03/liuanhuaming03.github.io/blob/main/code/tianchi/agent.py">查看 agent.py 源码</a></p>
+</main>
+
+<script>
+const SPEED = 4; // 回放倍速
+const CASES = {
+  direct: {
+    q: "（虚构）青栎馆是哪一年对外开放的？请只回答年份。",
+    steps: [
+      {t:"接收问题", d:"记录截止时间 deadline = now + 55 s", dur:0.2, st:"done"},
+      {t:"模型直答", d:"主模型返回“2018年”", dur:3.1, st:"done"},
+      {t:"候选检查", d:"题目要求年份 → 候选是 4 位数字，通过", dur:0.3, st:"done"},
+      {t:"检索回退", d:"直答已通过，跳过", dur:0, st:"skip"},
+      {t:"归一化", d:"“2018年” → 2018", dur:0.2, st:"done"},
+    ],
+    answer: "2018"
+  },
+  search: {
+    q: "（虚构）运营青栎馆的基金会，其创始人毕业于哪所大学？",
+    steps: [
+      {t:"接收问题", d:"记录截止时间 deadline = now + 55 s", dur:0.2, st:"done"},
+      {t:"模型直答", d:"主模型回答“不确定，可能是……”", dur:3.4, st:"done"},
+      {t:"候选检查", d:"含不确定表达，未通过 → 进入检索", dur:0.2, st:"fail"},
+      {t:"查询改写与拆分", d:"拆成：①青栎馆 运营方 ②该基金会 创始人", dur:1.2, st:"done"},
+      {t:"多源并发搜索", d:"IQS / Tavily / SerpAPI 并发；SerpAPI 超时 → 进入 300 s 冷却，不影响其他源", dur:6.5, st:"done"},
+      {t:"去重与排序", d:"按标题覆盖、词项重叠、实体一致性排序，取 Top-N", dur:0.6, st:"done"},
+      {t:"二跳检索", d:"首轮只命中“松桥基金会”，抽出实体补搜创始人", dur:5.8, st:"done"},
+      {t:"证据作答", d:"主模型基于证据回答“临川大学”", dur:4.2, st:"done"},
+      {t:"候选检查 + 归一化", d:"名称类答案，长度与格式通过", dur:0.4, st:"done"},
+    ],
+    answer: "临川大学"
+  },
+  timeout: {
+    q: "（虚构）青栎馆首任馆长在任期间主持修订的馆藏目录共有多少卷？",
+    steps: [
+      {t:"接收问题", d:"记录截止时间 deadline = now + 55 s", dur:0.2, st:"done"},
+      {t:"模型直答", d:"主模型给出一段解释，没有明确数字", dur:4.0, st:"done"},
+      {t:"候选检查", d:"不是数字答案，未通过 → 进入检索", dur:0.2, st:"fail"},
+      {t:"多源并发搜索", d:"三个源均无相关结果，证据为空", dur:9.5, st:"fail"},
+      {t:"升级更强模型", d:"qwen-plus 重新直答，单步时限 min(26 s, 剩余时间)", dur:26.0, st:"fail"},
+      {t:"兜底判断", d:"剩余时间不足一次完整调用；强制作答默认关闭", dur:0.4, st:"done"},
+    ],
+    answer: "unknown"
+  }
+};
+const $ = s => document.querySelector(s);
+let current = "direct", timers = [], running = false, cancelled = false;
+
+function render(caseId){
+  const c = CASES[caseId];
+  $("#question").innerHTML = "<b>题目</b>　" + c.q;
+  $("#steps").innerHTML = c.steps.map((s,i)=>`<li data-i="${i}"><span class="dot"></span><div><div class="t">${s.t}</div><div class="d">${s.d}</div></div><span class="ms"></span></li>`).join("");
+  $("#answer").style.display = "none";
+  $("#budget i").style.width = "0"; $("#budget").classList.remove("warn");
+  $("#elapsed").textContent = "已用 0.0 s";
+  $("#sse").innerHTML = "";
+}
+function log(cls, text){ const el = $("#sse"); el.insertAdjacentHTML("beforeend", `<span class="${cls}">${text}</span>\n`); el.scrollTop = el.scrollHeight; }
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; clearInterval(window._tick); }
+
+function run(){
+  clearTimers(); render(current); running = true; cancelled = false;
+  $("#run").disabled = true; $("#disconnect").disabled = false;
+  const c = CASES[current];
+  log("sys", esc("POST /answer  {\"question\": \"…\", \"stream\": true}"));
+  log("sys", esc("HTTP/1.1 200  Content-Type: text/event-stream"));
+  log("ping", esc("event: Ping\ndata: {\"status\":\"processing\"}\n"));
+  let t = 0; const t0 = performance.now();
+  window._tick = setInterval(()=>{
+    const sim = Math.min(55,(performance.now()-t0)/1000*SPEED);
+    $("#elapsed").textContent = `已用 ${sim.toFixed(1)} s`;
+    $("#budget i").style.width = (sim/55*100)+"%";
+    if (sim > 40) $("#budget").classList.add("warn");
+  }, 100);
+  let nextPing = 15;
+  c.steps.forEach((s,i)=>{
+    const start = t; t += s.dur;
+    timers.push(setTimeout(()=>{ const li = document.querySelector(`#steps li[data-i="${i}"]`); li.classList.add(s.st==="skip"?"skip":"on"); }, start/SPEED*1000));
+    timers.push(setTimeout(()=>{ const li = document.querySelector(`#steps li[data-i="${i}"]`); li.classList.remove("on"); li.classList.add(s.st); li.querySelector(".ms").textContent = s.st==="skip" ? "跳过" : `${s.dur.toFixed(1)} s`; }, t/SPEED*1000));
+  });
+  while (nextPing < t){ const p = nextPing; timers.push(setTimeout(()=>log("ping", esc(`event: Ping\ndata: {"status":"processing","elapsed":${p}}\n`)), p/SPEED*1000)); nextPing += 15; }
+  timers.push(setTimeout(()=>{
+    clearInterval(window._tick);
+    $("#elapsed").textContent = `已用 ${t.toFixed(1)} s`;
+    const a = $("#answer"); a.style.display = "block"; a.className = "answer" + (c.answer==="unknown"?" unknown":"");
+    a.textContent = "最终答案：" + c.answer + (c.answer==="unknown" ? "（宁可不答，也不强行猜）" : "");
+    log("msg", esc(`event: Message\ndata: {"answer":"${c.answer}"}\n`));
+    log("sys", "— 流结束，服务端关闭连接 —");
+    done();
+  }, t/SPEED*1000));
+}
+function done(){ running = false; $("#run").disabled = false; $("#disconnect").disabled = true; }
+function disconnect(){
+  if (!running) return;
+  clearTimers(); cancelled = true;
+  document.querySelectorAll("#steps li.on").forEach(li=>{li.classList.remove("on"); li.classList.add("fail"); li.querySelector(".ms").textContent="已取消";});
+  log("sys", "— 客户端断开 —");
+  log("sys", "服务端：捕获 asyncio.CancelledError → answer_task.cancel()，不再继续调用模型和搜索");
+  done();
+}
+document.querySelectorAll("[data-case]").forEach(b=>b.addEventListener("click",()=>{
+  if (running) return;
+  current = b.dataset.case;
+  document.querySelectorAll("[data-case]").forEach(x=>x.setAttribute("aria-pressed", String(x===b)));
+  render(current);
+}));
+$("#run").addEventListener("click", run);
+$("#disconnect").addEventListener("click", disconnect);
+render(current);
+</script>
+</body>
+</html>

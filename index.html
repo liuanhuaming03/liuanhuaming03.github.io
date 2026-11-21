@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>阮景怡 · 项目作品集</title>
+<meta name="description" content="阮景怡的项目作品集：AI Agent、检索增强、长文本生成、全栈工具与建模竞赛。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="index.html#core">实习与项目</a><a href="index.html#model">建模竞赛</a><a href="index.html#contact">联系</a></nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+<span class="eyebrow">Portfolio · Ruan Jingyi</span>
+<h1>阮景怡</h1>
+<p class="lead">AI 应用 / Agent / 算法方向 · 2027 届。这里收录了简历上的项目：每个项目都有一页说明，讲清问题、架构、我负责的部分和关键取舍；能演示的项目附有可直接操作的在线演示。</p>
+<div class="meta"><span><strong>中国地质大学（武汉）</strong> · 管理科学与工程 · 硕士 · 2024–2027</span><span><strong>中南大学（985）</strong> · 信息管理与信息系统 · 本科 · 卓越班 · 2020–2024</span></div>
+<div class="pill-row"><a class="btn primary" href="#core">查看项目</a><a class="btn" href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a><a class="btn muted" href="https://github.com/liuanhuaming03">GitHub</a></div>
+</div></section>
+<section class="block"><div class="wrap">
+<div class="section-head"><h2>一分钟导览</h2><p>如果时间有限，建议按这个顺序看。</p></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))">
+<div class="decision"><h3>Agent 与检索</h3><p><a href="projects/tianchi.html">天池 Research Agent</a>：时限内的工具调用、超时降级和 SSE。演示页可以逐步回放一次问答的运行轨迹。</p></div>
+<div class="decision"><h3>长文本生成（实习）</h3><p><a href="projects/wenci.html">文辞 AI</a>：拆解 → 改编 → 逐章生成的工作流，以及每章的检索参考与场景卡。演示页是公司项目的真实前端。</p></div>
+<div class="decision"><h3>全栈与交付</h3><p><a href="projects/career-workbench.html">求职工作台</a>与<a href="projects/research-workbench.html">研究工作台</a>：从需求、接口到页面，自己用、每天用的两个工具。</p></div>
+<div class="decision"><h3>算法与建模</h3><p><a href="projects/mcm.html">美赛奖牌预测</a>（Finalist）和 <a href="projects/mathorcup.html">MathorCup 分仓规划</a>（二等奖）：预测、分类与组合优化。</p></div>
+</div></div></section>
+<section class="block" id="core"><div class="wrap">
+<div class="section-head"><h2>实习与项目</h2><p>长文本生成实习、Agent 竞赛项目、硕士论文，以及支撑科研和求职的两个工作台。</p></div>
+<div class="grid cards"><article class="card">
+<a class="thumb" href="projects/tianchi.html" tabindex="-1" aria-hidden="true"><img src="assets/shots/tianchi-demo.jpg" alt="" loading="lazy"></a>
+<span class="kind">竞赛 · 独立完成</span>
+<h3><a href="projects/tianchi.html">天池 Research Agent</a></h3>
+<p>开放域事实问答 Agent：在单题 55 秒内决定直答、检索还是放弃，并用 SSE 把结果流式返回。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">Agent</span><span class="pill ghost">工具调用</span><span class="pill ghost">检索增强</span><span class="pill ghost">SSE</span></div>
+<div class="actions"><a class="btn" href="projects/tianchi.html">项目详情</a><a class="btn primary" href="demos/tianchi/index.html">在线演示</a><a class="btn muted" href="https://github.com/liuanhuaming03/liuanhuaming03.github.io/blob/main/code/tianchi/agent.py">源码</a></div>
+</article>
+<article class="card">
+<a class="thumb" href="projects/wenci.html" tabindex="-1" aria-hidden="true"><img src="assets/shots/wenci-write.jpg" alt="" loading="lazy"></a>
+<span class="kind">实习 · 杭州龙特星辰科技</span>
+<h3><a href="projects/wenci.html">文辞 AI 小说生成工作台</a></h3>
+<p>把长篇小说生成拆成“拆解 → 改编 → 逐章重写”三段工作流，每章先检索参考片段、生成场景卡，再写正文。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">长文本生成</span><span class="pill ghost">检索增强</span><span class="pill ghost">工作流编排</span><span class="pill ghost">Flask</span></div>
+<div class="actions"><a class="btn" href="projects/wenci.html">项目详情</a><a class="btn primary" href="demos/wenci/index.html">在线演示</a></div>
+</article>
+<article class="card">
+<a class="thumb" href="projects/thesis.html" tabindex="-1" aria-hidden="true"><img src="assets/shots/research-cases.jpg" alt="" loading="lazy"></a>
+<span class="kind">硕士毕业论文 · 在研</span>
+<h3><a href="projects/thesis.html">能源产消者 P2P 交易决策（硕士论文）</a></h3>
+<p>多类能源产消者的点对点交易仿真：强化学习做策略，案例检索提供先验，大模型只提出候选、由程序把关。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">多智能体强化学习</span><span class="pill ghost">案例检索</span><span class="pill ghost">LLM 决策安全</span><span class="pill ghost">实验设计</span></div>
+<div class="actions"><a class="btn" href="projects/thesis.html">项目详情</a><a class="btn primary" href="projects/research-workbench.html">研究工作台</a></div>
+</article>
+<article class="card">
+<a class="thumb" href="projects/research-workbench.html" tabindex="-1" aria-hidden="true"><img src="assets/shots/research-overview.jpg" alt="" loading="lazy"></a>
+<span class="kind">个人项目 · 科研与求职工作台（一）</span>
+<h3><a href="projects/research-workbench.html">研究工作台</a></h3>
+<p>毕业论文的离线工作台：从 README、实验报告和数据台账自动生成，一页看清数据、实验进度、案例库和文献。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">数据可视化</span><span class="pill ghost">自动化构建</span><span class="pill ghost">研究管理</span><span class="pill ghost">原生 JavaScript</span></div>
+<div class="actions"><a class="btn" href="projects/research-workbench.html">项目详情</a></div>
+</article>
+<article class="card">
+<a class="thumb" href="projects/career-workbench.html" tabindex="-1" aria-hidden="true"><img src="assets/shots/career-applications.jpg" alt="" loading="lazy"></a>
+<span class="kind">个人项目 · 科研与求职工作台（二）</span>
+<h3><a href="projects/career-workbench.html">求职工作台</a></h3>
+<p>本地运行的秋招工作台：岗位投递漏斗、简历素材、每日计划和 Obsidian 笔记检索放在同一个界面里。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">FastAPI</span><span class="pill ghost">原生 JavaScript</span><span class="pill ghost">本地数据</span><span class="pill ghost">Obsidian 集成</span></div>
+<div class="actions"><a class="btn" href="projects/career-workbench.html">项目详情</a><a class="btn primary" href="demos/career-workbench/index.html#career">在线演示</a><a class="btn muted" href="https://github.com/liuanhuaming03/liuanhuaming03.github.io/blob/main/code/career-workbench/server.py">源码</a></div>
+</article></div></div></section>
+<section class="block" id="model"><div class="wrap">
+<div class="section-head"><h2>建模竞赛</h2><p>预测与优化方向的两篇竞赛论文。</p></div>
+<div class="grid cards"><article class="card">
+<a class="thumb" href="projects/mcm.html" tabindex="-1" aria-hidden="true"><img src="assets/papers/mcm-p4.jpg" alt="" loading="lazy"></a>
+<span class="kind">建模竞赛 · 队长</span>
+<h3><a href="projects/mcm.html">美赛 2025：奥运奖牌数预测</a></h3>
+<p>2025 MCM/ICM C 题。构建特征工程预测 2028 年各国奖牌数，用逻辑回归预测首次获牌概率，并分析项目设置与“名帅效应”。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">特征工程</span><span class="pill ghost">SVR / Lasso</span><span class="pill ghost">逻辑回归</span><span class="pill ghost">分位数回归</span></div>
+<div class="actions"><a class="btn" href="projects/mcm.html">项目详情</a><a class="btn primary" href="assets/papers/MCM2025_Unveiling-the-Number-of-Olympic-Medals.pdf">阅读论文</a></div>
+</article>
+<article class="card">
+<a class="thumb" href="projects/mathorcup.html" tabindex="-1" aria-hidden="true"><img src="assets/papers/mathorcup-p6.jpg" alt="" loading="lazy"></a>
+<span class="kind">建模竞赛</span>
+<h3><a href="projects/mathorcup.html">MathorCup 2024：电商货量预测与分仓规划</a></h3>
+<p>预测 350 个品类未来三个月的库存与销量，再在仓容、产能和租金约束下用粒子群与遗传算法求分仓方案。</p>
+<div class="pill-row" style="margin-top:4px"><span class="pill ghost">ARIMA</span><span class="pill ghost">0-1 整数规划</span><span class="pill ghost">粒子群算法</span><span class="pill ghost">遗传算法</span></div>
+<div class="actions"><a class="btn" href="projects/mathorcup.html">项目详情</a><a class="btn primary" href="assets/papers/MathorCup2024_ecommerce-forecast-warehouse.pdf">阅读论文</a></div>
+</article></div></div></section>
+
+<section class="block" id="contact"><div class="wrap">
+<div class="section-head"><h2>联系我</h2><p>欢迎通过邮件联系，简历上有电话。</p></div>
+<div class="contact"><a class="btn primary" href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a><a class="btn" href="https://github.com/liuanhuaming03">github.com/liuanhuaming03</a></div>
+</div></section>
+</main>
+<footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天池 Research Agent · 阮景怡</title>
+<meta name="description" content="开放域事实问答 Agent：在单题 55 秒内决定直答、检索还是放弃，并用 SSE 把结果流式返回。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323533c'/%3E%3Ctext x='16' y='22' font-size='17' text-anchor='middle' fill='%23b8e06a' font-family='sans-serif' font-weight='700'%3E阮%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header class="topnav"><div class="wrap">
+<a class="brand" href="../index.html">阮景怡<small>项目作品集</small></a>
+<nav aria-label="站点导航"><a href="../index.html#core">实习与项目</a><a href="../index.html#model">建模竞赛</a><a href="../index.html#contact">联系</a></nav>
+</div></header>
+<main>
+<div class="wrap crumbs"><a href="../index.html">作品集</a> / 天池 Research Agent</div>
+<section class="hero" style="padding-top:26px"><div class="wrap">
+<span class="eyebrow">竞赛 · 独立完成</span>
+<h1 style="font-size:clamp(1.8rem,4.2vw,2.8rem)">天池 Research Agent</h1>
+<p class="lead">开放域事实问答 Agent：在单题 55 秒内决定直答、检索还是放弃，并用 SSE 把结果流式返回。</p>
+<div class="meta"><span><strong>赛事</strong>　阿里云 Data+AI 工程师全球大奖赛 · Agent 构建挑战赛</span><span><strong>成绩</strong>　复赛第 44 名</span><span><strong>角色</strong>　独立完成设计与全部代码</span></div>
+<div class="pill-row"><span class="pill">Agent</span><span class="pill">工具调用</span><span class="pill">检索增强</span><span class="pill">SSE</span><span class="pill">AgentScope Runtime</span></div>
+<div class="pill-row" style="margin-top:22px"><a class="btn primary" href="../demos/tianchi/index.html">交互演示：运行轨迹与 SSE 事件</a><a class="btn muted" href="https://github.com/liuanhuaming03/liuanhuaming03.github.io/blob/main/code/tianchi/agent.py">源码</a></div>
+</div></section>
+<section class="block"><div class="wrap"><h2>背景与问题</h2><p class="lead" style="margin-top:10px">赛题是开放域事实问答，评测按答案精确匹配打分。模型直答快，但容易给出过时或编造的事实；每题都去搜索又会增加延迟并引入噪声，而单题总时限只有约 55 秒。难点不在“能不能调用搜索”，而在于什么时候搜、搜到什么程度、时间不够时怎么体面地退出。</p></div></section>
+<section class="block"><div class="wrap"><h2>整体流程</h2><ol class="flow" aria-label="流程"><li><b>接收问题</b><span>记录截止时间，之后每一步按剩余时间分配时限</span></li><li><b>模型直答</b><span>候选检查：格式、长度、不确定表达</span></li><li><b>检索回退</b><span>查询改写与拆分，多源搜索并发</span></li><li><b>证据整理</b><span>去重、按词项与实体一致性排序、二跳补搜</span></li><li><b>证据作答</b><span>主模型不通过时升级到更强模型</span></li><li><b>归一化与退出</b><span>按题型整理数字、语言和名字格式，返回答案或 unknown</span></li></ol></div></section>
+<section class="block"><div class="wrap"><h2>我做了什么</h2><ul class="points" style="margin-top:12px"><li>设计并实现整条问答主流程：直答 → 校验 → 检索 → 证据作答 → 归一化，所有阶段共享一个总截止时间，单步时限由剩余时间计算。</li><li>接入 IQS、Tavily、SerpAPI 三个搜索源，统一结果结构后并发调用；单源超时或报错时进入冷却，不影响其他源。</li><li>实现查询改写与拆分、基于实体的二跳检索，以及按标题覆盖、词项重叠、年份和实体一致性的可解释排序。</li><li>用 AgentScope Runtime 的 AgentApp 部署成服务，/answer 同时支持 JSON 和 SSE：先发 Ping 保持连接，答完发最终消息；客户端断开时取消后台任务。</li><li>编写批量回归脚本，固定题集比较各版本的输出覆盖率与耗时，作为每次改动的回归检查。</li></ul></div></section>
+<section class="block"><div class="wrap"><h2>关键设计与取舍</h2><div class="grid two" style="margin-top:14px"><div class="decision"><h3>固定级联为主，ReAct 作为可选分支</h3><p><span class="label">做法</span>代码里保留了 LangChain create_agent（底层是 LangGraph 的 ReAct 图）挂载三个搜索工具，但默认关闭。</p><p><span class="label">原因与代价</span>55 秒内需要精确控制每一步的耗时和调用次数；固定流程每步可预测，ReAct 的步数和延迟不可控。代价是少了根据工具反馈灵活改路线的能力。</p></div><div class="decision"><h3>宁可返回 unknown，也不强行猜</h3><p><span class="label">做法</span>最后兜底的“强制作答”和“从文档标题猜答案”默认关闭。</p><p><span class="label">原因与代价</span>评测按精确匹配计分，低置信度的猜测很少得分，还会掩盖真实的失败原因。保留 unknown 可以把失败归到具体环节：工具超时、证据不足还是格式错误。</p></div><div class="decision"><h3>心跳和结果分开</h3><p><span class="label">做法</span>SSE 用独立的 Ping 事件保活，最终答案用另一个事件返回。</p><p><span class="label">原因与代价</span>心跳只说明连接还活着，不代表模型还在产出内容；分开之后，前端和网关都能区分“在等”和“已完成”。</p></div></div></div></section>
+<section class="block"><div class="wrap"><h2>结果</h2><div class="stat-row" style="margin-top:14px"><div class="stat"><b>复赛第 44 名</b><span>阿里云 Data+AI 工程师全球大奖赛 Agent 构建挑战赛</span></div><div class="stat"><b>19 / 20、93 / 100</b><span>两批历史测试中返回非 unknown 答案的题数（衡量覆盖率，不等于准确率）</span></div></div></div></section><section class="block qa"><div class="wrap"><h2>常见追问</h2><div style="margin-top:14px"><details><summary>这是 RAG 吗？</summary><p>宽泛地说是检索增强生成，但检索来自运行时调用的外部搜索 API，不是自建的向量库。我控制的是查询构造、多源融合、排序和证据注入，搜索引擎内部的召回不在我的控制范围。</p></details><details><summary>怎么证明检索值得做？</summary><p>固定题集和模型设置，对照“只直答”“直答 + 检索回退”“再开启 ReAct”三组，记录精确匹配率、unknown 比例、工具调用次数和 p95 延迟，分题型报告。</p></details><details><summary>时间快用完了怎么办？</summary><p>先给最终校验和回包预留时间；剩余时间不够一次完整调用时不再发起搜索，用已有的有效证据作答，否则返回 unknown。</p></details></div></div></section><div class="wrap next-prev"><a class="btn muted" href="mathorcup.html">← MathorCup 2024：电商货量预测与分仓规划</a><a class="btn muted" href="wenci.html">文辞 AI 小说生成工作台 →</a></div></main><footer class="site"><div class="wrap">© 2026 阮景怡 · <a href="mailto:jy.ruan2003@foxmail.com">jy.ruan2003@foxmail.com</a> · <a href="https://github.com/liuanhuaming03">GitHub</a><br>演示页使用示例数据，不调用模型、不采集真实数据。</div></footer>
+</body></html>
