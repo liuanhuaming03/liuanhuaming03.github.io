@@ -6,20 +6,70 @@
     <title>文辞 AI · 在线演示</title>
     <script src="graph-lite.js"></script>
     
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20260617-split-guard">
 </head>
 <body>
     <canvas id="particles-canvas"></canvas>
 
-    <div class="main-container workflow-page">
+    <div class="main-container workflow-page is-home" id="workflow-page">
         <header class="header workflow-header">
             <div class="header-glow"></div>
-            <h1 class="title">
-                <span class="title-icon">✦</span>
-                文辞AI
-                <span class="title-icon">✦</span>
-            </h1>
-            <p class="subtitle">三步完成：AI拆解原文 · AI改编框架 · AI重写正文</p>
+            <div class="workflow-header__main-row">
+                <h1 class="title" aria-label="文辞AI">
+                    <span class="title-icon">✦</span>
+                    文辞AI
+                    <span class="title-icon">✦</span>
+                </h1>
+                <span class="workflow-breadcrumb" id="workflow-breadcrumb">/ 主界面</span>
+                <nav class="workflow-progress" id="workflow-progress">
+                    <div class="progress-step is-active" data-step="1" role="button" tabindex="0" onclick="enterModule('split')">
+                        <span class="progress-step__index">1</span>
+                        <span class="progress-step__label">AI拆解</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="2" role="button" tabindex="0" onclick="enterModule('adapt')">
+                        <span class="progress-step__index">2</span>
+                        <span class="progress-step__label">AI改编</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="3" role="button" tabindex="0" onclick="enterModule('write')">
+                        <span class="progress-step__index">3</span>
+                        <span class="progress-step__label">AI重写</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="4" role="button" tabindex="0" onclick="enterModule('intro')">
+                        <span class="progress-step__index">4</span>
+                        <span class="progress-step__label">导语优化</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="9" role="button" tabindex="0" onclick="enterModule('reverse_intro')">
+                        <span class="progress-step__index">新</span>
+                        <span class="progress-step__label">导语定制</span>
+                    </div>
+                </nav>
+                <nav class="workflow-subprogress" id="adaptation-substeps">
+                    <span class="progress-substep" data-stage="4">改编设定</span>
+                    <span class="progress-substep" data-stage="5">人物替换</span>
+                    <span class="progress-substep" data-stage="6">新大纲生成</span>
+                </nav>
+                <div class="header-toolbar" id="header-toolbar">
+                    <span class="header-toolbar__label">沉浸编辑台</span>
+                    <button class="editor-toolbtn" type="button" onclick="focusPrimaryEditor()">聚焦编辑</button>
+                    <button class="editor-toolbtn" type="button" onclick="copyActiveEditorText()">复制当前稿</button>
+                    <span class="header-toolbar__sep">&middot;</span>
+                    <button class="editor-toolbtn editor-toolbtn--tab is-active" type="button" data-editor-tab="references" onclick="toggleEditorPanelTab('references')">参考片段</button>
+                    <button class="editor-toolbtn editor-toolbtn--tab" type="button" data-editor-tab="profile" onclick="toggleEditorPanelTab('profile')">人物设定</button>
+                    <button class="editor-toolbtn editor-toolbtn--tab" type="button" data-editor-tab="suggestions" onclick="toggleEditorPanelTab('suggestions')">生成建议</button>
+                </div>
+            </div>
+            <div class="header-bottom-row">
+                <div class="header-selection-bar" id="header-selection-bar" style="display:none;">
+                    <span class="header-selection-bar__item"><span class="header-selection-bar__label">世界观</span><span class="header-selection-bar__value" id="outline-worldview-label">—</span></span>
+                    <span class="header-selection-bar__item"><span class="header-selection-bar__label">题材</span><span class="header-selection-bar__value" id="outline-genre-label">—</span></span>
+                    <span class="header-selection-bar__item"><span class="header-selection-bar__label">频道</span><span class="header-selection-bar__value" id="outline-audience-label">—</span></span>
+                    <span class="header-selection-bar__item"><span class="header-selection-bar__label">核心场景</span><span class="header-selection-bar__value" id="outline-scene-label">—</span></span>
+                </div>
+            </div>
             <div class="user-info-bar" id="user-info-bar" style="display:none;">
                 <span class="user-info-bar__avatar">👤</span>
                 <span class="user-info-bar__name" id="user-display-name">用户</span>
@@ -28,42 +78,65 @@
             </div>
         </header>
 
-        <section class="workflow-progress" id="workflow-progress">
-            <div class="progress-step is-active" data-step="1" role="button" tabindex="0" onclick="enterModule('split')">
-                <span class="progress-step__index">1</span>
-                <span class="progress-step__label">AI拆解</span>
+        <section class="home-screen" id="home-screen">
+            <div class="home-brand">
+                <div class="home-logo" aria-hidden="true">文</div>
+                <div>
+                    <h2 class="home-title">文辞AI</h2>
+                </div>
             </div>
-            <div class="progress-line"></div>
-            <div class="progress-step" data-step="2" role="button" tabindex="0" onclick="enterModule('adapt')">
-                <span class="progress-step__index">2</span>
-                <span class="progress-step__label">AI改编</span>
-            </div>
-            <div class="progress-line"></div>
-            <div class="progress-step" data-step="3" role="button" tabindex="0" onclick="enterModule('write')">
-                <span class="progress-step__index">3</span>
-                <span class="progress-step__label">AI重写</span>
+            <div class="home-step-grid" aria-label="工作模式入口">
+                <button class="home-step-button" type="button" data-entry-step="split" onclick="createTaskFromHome('split')">
+                    <span class="home-step-button__num">01</span>
+                    <span class="home-step-button__label">AI拆解</span>
+                </button>
+                <button class="home-step-button" type="button" data-entry-step="adapt" onclick="createTaskFromHome('adapt')">
+                    <span class="home-step-button__num">02</span>
+                    <span class="home-step-button__label">AI改编</span>
+                </button>
+                <button class="home-step-button" type="button" data-entry-step="write" onclick="createTaskFromHome('write')">
+                    <span class="home-step-button__num">03</span>
+                    <span class="home-step-button__label">AI重写</span>
+                </button>
+                <button class="home-step-button" type="button" data-entry-step="intro" onclick="createTaskFromHome('intro')">
+                    <span class="home-step-button__num">04</span>
+                    <span class="home-step-button__label">导语优化</span>
+                </button>
+                <button class="home-step-button" type="button" data-entry-step="reverse_intro" onclick="createTaskFromHome('reverse_intro')">
+                    <span class="home-step-button__num">NEW</span>
+                    <span class="home-step-button__label">导语定制</span>
+                </button>
             </div>
         </section>
 
-        <section class="workflow-subprogress" id="adaptation-substeps">
-            <div class="progress-step__substeps">
-                <span class="progress-substep" data-stage="4">改编设定</span>
-                <span class="progress-substep" data-stage="5">人物替换</span>
-                <span class="progress-substep" data-stage="6">新大纲生成</span>
-            </div>
-        </section>
+        <button
+            class="task-sidebar-restore"
+            id="task-sidebar-restore"
+            type="button"
+            onclick="toggleTaskSidebarCollapse()"
+            aria-label="展开任务文件栏"
+            title="展开任务文件栏"
+            hidden
+        >
+            <span>›</span>
+        </button>
 
         <div class="workflow-shell">
             <aside class="task-sidebar" id="task-sidebar">
                 <div class="task-sidebar__header">
                     <div>
-                        <div class="task-sidebar__eyebrow">Task Console</div>
-                        <div class="task-sidebar__title">我的任务</div>
+                        <div class="task-sidebar__eyebrow">任务台</div>
+                        <div class="task-sidebar__title">任务文件</div>
                     </div>
-                    <button class="btn btn-secondary btn-secondary--small" type="button" onclick="startNewTaskDraft()">
-                        <span class="btn-icon">＋</span>
-                        <span class="btn-text">新建任务</span>
-                    </button>
+                    <div class="task-sidebar__header-actions">
+                        <button class="task-sidebar__collapse-btn" type="button" onclick="toggleTaskSidebarCollapse()" aria-label="收起任务文件栏" title="收起任务文件栏">
+                            <span>‹</span>
+                        </button>
+                        <button class="btn btn-secondary btn-secondary--small" type="button" onclick="startNewTaskDraft()">
+                            <span class="btn-icon">＋</span>
+                            <span class="btn-text">新建</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="task-sidebar__user" id="task-sidebar-user">正在识别当前用户...</div>
                 <div class="task-sidebar__meta" id="task-sidebar-meta">载入后可查看该用户的历史任务记录。</div>
@@ -76,19 +149,21 @@
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="调整任务导航宽度"
-            >
+            ></div>
+
+            <div class="workflow-main" id="stages-container">
+            <div class="editor-quickbar" aria-label="编辑快捷操作">
                 <button
                     type="button"
-                    class="task-sidebar-divider__handle"
+                    class="editor-quickbar__sidebar-toggle"
                     id="task-sidebar-toggle"
                     aria-label="收起或展开任务导航"
                     onclick="toggleTaskSidebarCollapse()"
                 >
-                    <span class="task-sidebar-divider__chevron" id="task-sidebar-toggle-icon">‹</span>
+                    <span id="task-sidebar-toggle-icon">‹</span>
                 </button>
+                <span id="editor-current-mode" hidden></span>
             </div>
-
-            <div class="workflow-main" id="stages-container">
             <!-- ====== Stage 1: AI拆解 ====== -->
             <section class="workflow-stage" id="stage-1">
                 <div class="stage-header">
@@ -127,47 +202,49 @@
                             <div class="history-reference-workbench__intro">
                                 <div class="history-reference-workbench__eyebrow">Reference Console</div>
                                 <div class="history-reference-workbench__title-row">
-                                    <div class="field-label history-reference-workbench__title">历史爆款参考</div>
-                                    <span class="history-reference-badge history-reference-badge--highlight">近7天</span>
+                                    <div class="field-label history-reference-workbench__title" id="history-reference-workbench-title">历史爆款参考</div>
+                                    <span class="history-reference-badge history-reference-badge--highlight" id="history-reference-source-badge">近7天</span>
                                     <span class="history-reference-badge">已拆解</span>
                                     <span class="history-reference-badge">可直接带入</span>
                                 </div>
-                                <p class="summary-text history-reference-workbench__summary">从近一周上榜次数=1且已拆解完成的历史爆款中选取参考样本，完成查看、对比和一键带入。</p>
+                                <p class="summary-text history-reference-workbench__summary" id="history-reference-summary">从近一周上榜次数=1且已拆解完成的历史爆款中选取参考样本，完成查看、对比和一键带入。</p>
                             </div>
                             <div class="history-reference-workbench__status">
-                                <div class="history-reference-status-card">
-                                    <span class="history-reference-status-card__label">当前日期</span>
-                                    <strong class="history-reference-status-card__value" id="history-reference-current-date">未选择</strong>
+                                <div class="history-reference-filter history-reference-filter--source">
+                                    <button type="button" class="history-reference-status-card" onclick="toggleHistoryReferenceFilter('source')">
+                                        <span class="history-reference-status-card__label">参考来源</span>
+                                        <strong class="history-reference-status-card__value" id="history-reference-current-source">近7日爆款书籍</strong>
+                                    </button>
+                                    <div class="history-reference-filter__popover" id="history-reference-source-menu">
+                                        <div class="history-reference-catalog__label">参考来源</div>
+                                        <div id="history-reference-sources" class="history-reference-list history-reference-list--sources"></div>
+                                    </div>
                                 </div>
-                                <div class="history-reference-status-card">
-                                    <span class="history-reference-status-card__label">当前书目</span>
-                                    <strong class="history-reference-status-card__value" id="history-reference-current-book">未选择</strong>
+                                <div class="history-reference-filter">
+                                    <button type="button" class="history-reference-status-card" onclick="toggleHistoryReferenceFilter('date')">
+                                        <span class="history-reference-status-card__label">当前日期</span>
+                                        <strong class="history-reference-status-card__value" id="history-reference-current-date">未选择</strong>
+                                    </button>
+                                    <div class="history-reference-filter__popover" id="history-reference-date-menu">
+                                        <div class="history-reference-catalog__label" id="history-reference-date-label">近一周日期</div>
+                                        <div id="history-reference-dates" class="history-reference-list history-reference-list--dates"></div>
+                                    </div>
+                                </div>
+                                <div class="history-reference-filter history-reference-filter--book">
+                                    <button type="button" class="history-reference-status-card" onclick="toggleHistoryReferenceFilter('book')">
+                                        <span class="history-reference-status-card__label">当前书目</span>
+                                        <strong class="history-reference-status-card__value" id="history-reference-current-book">未选择</strong>
+                                    </button>
+                                    <div class="history-reference-filter__popover history-reference-filter__popover--book" id="history-reference-book-menu">
+                                        <div class="history-reference-catalog__label" id="history-reference-book-label">当天爆款书</div>
+                                        <div id="history-reference-books" class="history-reference-list history-reference-list--books"></div>
+                                    </div>
                                 </div>
                                 <button type="button" class="history-reference-close" onclick="closeHistoryReferencePanel()">收起</button>
                             </div>
                         </div>
 
-                        <div class="history-reference-workbench__body">
-                            <section class="history-reference-pane history-reference-pane--dates">
-                                <div class="history-reference-pane__header">
-                                    <div>
-                                        <div class="history-reference-pane__title">近一周日期</div>
-                                        <div class="history-reference-pane__desc">优先展示前一日，可切换查看近 7 天样本。</div>
-                                    </div>
-                                </div>
-                                <div id="history-reference-dates" class="history-reference-list history-reference-list--dates"></div>
-                            </section>
-
-                            <section class="history-reference-pane history-reference-pane--books">
-                                <div class="history-reference-pane__header">
-                                    <div>
-                                        <div class="history-reference-pane__title">当天爆款书</div>
-                                        <div class="history-reference-pane__desc">仅展示当日符合条件且已拆解完成的书目。</div>
-                                    </div>
-                                </div>
-                                <div id="history-reference-books" class="history-reference-list history-reference-list--books"></div>
-                            </section>
-
+                        <div class="history-reference-workbench__body history-reference-workbench__body--merged">
                             <section class="history-reference-pane history-reference-pane--preview">
                                 <div class="history-reference-pane__header">
                                     <div>
@@ -212,7 +289,7 @@
                         <div class="textarea-border"></div>
                     </div>
                     <div class="button-group button-group--left">
-                        <button class="btn btn-primary" onclick="splitNovelStep()">
+                        <button class="btn btn-primary" id="step1-split-btn" onclick="splitNovelStep()">
                             <span class="btn-icon">✂️</span>
                             <span class="btn-text">开始拆解原文，生成框架</span>
                             <span class="btn-glow"></span>
@@ -220,7 +297,7 @@
                         <input type="file" id="upload-raw-file" accept=".txt" style="display:none">
                         <button class="btn btn-secondary" onclick="document.getElementById('upload-raw-file').click()">
                             <span class="btn-icon">📄</span>
-                            <span class="btn-text">上传原文 .txt</span>
+                            <span class="btn-text">上传文件</span>
                         </button>
                         <button class="btn btn-skip" onclick="switchToStep(2)">
                             <span class="btn-icon">⏭️</span>
@@ -229,27 +306,6 @@
                     </div>
                 </div>
 
-                <div class="stage-card relationship-result-card" id="step1-relationship-card" style="display:none;">
-                    <div class="relationship-result-card__header">
-                        <div>
-                            <div class="relationship-result-card__title">人物关系图</div>
-                            <div class="relationship-result-card__desc">解析完成后，会在这里展示当前拆解稿的人物关系与阵营结构，方便回看和校对。</div>
-                        </div>
-                        <span class="history-reference-badge">自动生成</span>
-                    </div>
-                    <div class="graph-container">
-                        <div id="graph-chart" class="graph-chart"></div>
-                    </div>
-                    <div class="stats-bar">
-                        <div class="stat-item"><span class="stat-value" id="stat-characters">0</span><span class="stat-label">人物角色</span></div>
-                        <div class="stat-item"><span class="stat-value" id="stat-relations">0</span><span class="stat-label">关系连线</span></div>
-                        <div class="stat-item"><span class="stat-value" id="stat-groups">0</span><span class="stat-label">阵营分组</span></div>
-                    </div>
-                    <div class="relationship-summary-box">
-                        <div class="field-label">人物关系摘要</div>
-                        <p id="relationship-summary-text" class="summary-text"></p>
-                    </div>
-                </div>
             </section>
 
             <!-- ====== Stage 2: 拆解输入 ====== -->
@@ -278,7 +334,7 @@
                         <div class="textarea-border"></div>
                     </div>
                     <div class="button-group button-group--left">
-                        <button class="btn btn-primary" onclick="analyzeOutlineStep()">
+                        <button class="btn btn-primary" id="step2-analyze-btn" onclick="analyzeOutlineStep()">
                             <span class="btn-icon">🧩</span>
                             <span class="btn-text">进入改编工作流</span>
                             <span class="btn-glow"></span>
@@ -288,25 +344,7 @@
                             <span class="btn-icon">📄</span>
                             <span class="btn-text">上传拆解 .txt</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="copyTextFromTextarea('input-outline-text')">
-                            <span class="btn-icon">📋</span>
-                            <span class="btn-text">复制拆解结果</span>
-                        </button>
                     </div>
-                </div>
-            </section>
-
-            <!-- ====== Stage 3: 人物关系（跳过） ====== -->
-            <section class="workflow-stage" id="stage-3" style="display:none;">
-                <div class="stage-header">
-                    <div>
-                        <h2 class="stage-title">第二步 · AI改编</h2>
-                        <p class="stage-desc">人物关系图谱已并入第一页底部展示，这里保留为兼容中转页，不再作为必经步骤。</p>
-                    </div>
-                    <div class="stage-badge">当前步骤</div>
-                </div>
-                <div class="stage-card stage-card--muted">
-                    <div class="summary-text">当前版本解析成功后会直接进入改编设定，人物关系图会展示在第一页尾部，便于随时回看。</div>
                 </div>
             </section>
 
@@ -314,200 +352,195 @@
             <section class="workflow-stage" id="stage-4" style="display:none;">
                 <div class="stage-header">
                     <div>
-                        <h2 class="stage-title">第二步 · AI改编</h2>
-                        <p class="stage-desc">请配置改编设定：选择世界观、题材、目标读者和核心场景。每项都可以保持原样。</p>
+                        <h2 class="stage-title">改编设定与人物替换</h2>
+                        <p class="stage-desc">确认改编方向，必要时替换人物小传，再生成新的故事大纲。</p>
                     </div>
                     <div class="stage-header-actions">
-                        <button
-                            type="button"
-                            class="stage-header-toggle stage-header-toggle--save"
-                            onclick="saveCurrentStep2Draft()"
-                        >
-                            <span class="stage-header-toggle__text">保存当前进度</span>
-                            <span class="stage-header-toggle__icon">💾</span>
+                        <button type="button" class="btn btn-secondary stage-action-btn stage-action-btn--save" onclick="saveCurrentStep2Draft()">
+                            <span class="btn-text">保存当前进度</span>
                         </button>
-                        <div class="stage-badge">当前步骤</div>
+                        <button type="button" class="btn btn-primary stage-action-btn stage-action-btn--mint" onclick="generateCandidateCharacters()">
+                            <span class="btn-text">生成候选</span>
+                        </button>
+                        <button type="button" class="btn btn-primary stage-action-btn" id="confirm-adaptation-btn" onclick="confirmMergedAdaptationAndGoOutline()" disabled>
+                            <span class="btn-text">生成新大纲</span>
+                        </button>
                     </div>
                 </div>
                 <div class="stage-card">
-                    <!-- 区块A: 世界观选择 -->
-                    <div class="adaptation-section">
-                        <div class="adaptation-section__header">
-                            <span class="adaptation-section__title">世界观</span>
-                            <button class="btn btn-skip btn-skip--inline" onclick="keepOriginalWorldview()">
-                                <span class="btn-icon">⏭️</span>
-                                <span class="btn-text">保持原样</span>
-                            </button>
-                        </div>
-                        <div class="adaptation-section__body">
+                    <div class="adaptation-settings-panel">
+                        <div class="adaptation-field adaptation-field--worldview">
+                            <div class="adaptation-field__top">
+                                <label class="adaptation-field__label" for="worldview-select">世界观</label>
+                                <button class="btn btn-skip btn-skip--inline" type="button" onclick="keepOriginalWorldview()">
+                                    <span class="btn-text">保持原样</span>
+                                </button>
+                            </div>
                             <select id="worldview-select" class="workflow-input workflow-select" onchange="onWorldviewSelectChange(this)">
                                 <option value="" disabled selected>请选择世界观</option>
-                                <option value="现代">🏙️ 现代</option>
-                                <option value="年代">📻 年代</option>
-                                <option value="古代">🏯 古代</option>
-                                <option value="未来">🚀 未来</option>
-                                <option value="玄幻">⚔️ 玄幻</option>
+                                <option value="现代">现代</option>
+                                <option value="年代">年代</option>
+                                <option value="古代">古代</option>
+                                <option value="未来">未来</option>
+                                <option value="玄幻">玄幻</option>
                             </select>
+                            <div class="adaptation-field__hint">已从分析结果自动匹配</div>
                             <div class="skip-info-box" id="skip-worldview-info">
                                 <div class="skip-info-label">将使用原始大纲中的世界观</div>
                                 <div class="skip-info-value" id="skip-worldview-value">—</div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 区块B: 题材选择 -->
-                    <div class="adaptation-section" id="genre-section">
-                        <div class="adaptation-section__header">
-                            <span class="adaptation-section__title">题材类型（单选）</span>
-                            <span class="adaptation-section__meta" id="selected-genre-count">已选 0 / 1</span>
-                            <button class="btn btn-skip btn-skip--inline" onclick="keepOriginalGenre()">
-                                <span class="btn-icon">⏭️</span>
-                                <span class="btn-text">保持原样</span>
-                            </button>
+                        <div class="adaptation-field adaptation-field--audience">
+                            <div class="adaptation-field__top">
+                                <label class="adaptation-field__label" for="audience-select">目标读者</label>
+                                <button class="btn btn-skip btn-skip--inline" type="button" title="与原有爆款小说拆解结果一致" onclick="keepOriginalAudience()">
+                                    <span class="btn-text">保持原样</span>
+                                </button>
+                            </div>
+                            <select id="audience-select" class="workflow-input workflow-select" onchange="onAudienceSelectChange(this)">
+                                <option value="" disabled selected>请选择目标读者</option>
+                                <option value="男频">男频</option>
+                                <option value="女频">女频</option>
+                            </select>
+                            <div class="adaptation-field__hint">已从分析结果自动匹配</div>
+                            <div class="skip-info-box" id="skip-audience-info">
+                                <div class="skip-info-label">将使用原始大纲中的目标读者</div>
+                                <div class="skip-info-value" id="skip-audience-value">—</div>
+                            </div>
                         </div>
-                        <div class="adaptation-section__body" id="genre-section-body">
+
+                        <div class="adaptation-field adaptation-field--genre" id="genre-section">
+                            <div class="adaptation-field__top">
+                                <label class="adaptation-field__label" for="genre-select">题材类型</label>
+                                <button class="btn btn-skip btn-skip--inline" type="button" onclick="keepOriginalGenre()">
+                                    <span class="btn-text">保持原样</span>
+                                </button>
+                            </div>
                             <div class="genre-section-placeholder" id="genre-placeholder">
-                                <span class="genre-section-placeholder__text">请先选择世界观，题材将根据世界观动态加载</span>
+                                <span class="genre-section-placeholder__text">请先选择世界观</span>
                             </div>
-                            <div class="genre-selection" id="genre-selection"></div>
-                            <div class="selected-tags-box" id="selected-genres-preview" style="display:none;">
-                                <div class="field-label">已选题材</div>
-                                <div class="selected-tags" id="selected-genres-tags"></div>
-                            </div>
+                            <select id="genre-select" class="workflow-input workflow-select" onchange="onGenreSelectChange(this)" style="display:none;">
+                                <option value="" disabled selected>请选择题材类型</option>
+                            </select>
+                            <div class="adaptation-field__hint">已从分析结果自动匹配</div>
                             <div class="skip-info-box" id="skip-genre-info">
                                 <div class="skip-info-label">将使用原始大纲中的题材</div>
                                 <div class="skip-info-value" id="skip-genre-value">—</div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- 区块C: 男女频选择 -->
-                    <div class="adaptation-section">
-                        <div class="adaptation-section__header">
-                            <span class="adaptation-section__title">目标读者</span>
-                        </div>
-                        <div class="adaptation-section__body">
-                            <select id="audience-select" class="workflow-input workflow-select" onchange="onAudienceSelectChange(this)">
-                                <option value="" disabled selected>请选择目标读者</option>
-                                <option value="男频">🔥 男频</option>
-                                <option value="女频">🌸 女频</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- 区块D: 核心场景选择 -->
-                    <div class="adaptation-section">
-                        <div class="adaptation-section__header">
-                            <span class="adaptation-section__title">核心场景</span>
-                            <button class="btn btn-skip btn-skip--inline" onclick="keepOriginalScene()">
-                                <span class="btn-icon">⏭️</span>
-                                <span class="btn-text">保持原样</span>
-                            </button>
-                        </div>
-                        <div class="adaptation-section__body">
-                            <div class="field-label" style="margin-top:0;">原始核心场景（LLM分析结果）</div>
+                        <div class="adaptation-field adaptation-field--scene">
+                            <div class="adaptation-field__top">
+                                <label class="adaptation-field__label" for="core-scene-input">核心场景</label>
+                                <button class="btn btn-skip btn-skip--inline" type="button" onclick="keepOriginalScene()">
+                                    <span class="btn-text">保持原样</span>
+                                </button>
+                            </div>
                             <div class="original-scene-display" id="original-scene-display">
                                 <span id="original-scene-text">—</span>
                             </div>
-                            <div class="button-group button-group--left" style="margin-top:12px;">
-                                <button class="btn btn-secondary" onclick="matchScenesFromLibrary()">
-                                    <span class="btn-icon">🔍</span>
+                            <input id="core-scene-input" class="workflow-input" type="text" placeholder="输入或选择新的核心场景" oninput="onCoreSceneInputChange(this)">
+                            <div class="adaptation-field__hint">可直接输入自定义场景，也可以从下方候选场景中点击选择</div>
+                            <div class="scene-match-row">
+                                <button class="btn btn-secondary scene-match-btn" type="button" onclick="applyManualCoreScene()">
+                                    <span class="btn-text">使用当前输入场景</span>
+                                </button>
+                                <button class="btn btn-secondary scene-match-btn" type="button" onclick="matchScenesFromLibrary()">
                                     <span class="btn-text">从场景库匹配相似场景</span>
                                 </button>
+                                <div id="matched-scenes-area" style="display:none;">
+                                    <div class="scene-selection" id="new-scene-selection"></div>
+                                </div>
                             </div>
                             <div class="skip-info-box" id="skip-scene-info">
                                 <div class="skip-info-label">将使用原始核心场景</div>
                                 <div class="skip-info-value" id="skip-scene-value">—</div>
                             </div>
-                            <div id="matched-scenes-area" style="display:none;">
-                                <div class="field-label" style="margin-top:14px;">场景库匹配结果</div>
-                                <div class="scene-selection" id="new-scene-selection"></div>
+                        </div>
+                    </div>
+
+                    <div class="adaptation-section">
+                        <div class="adaptation-section__header">
+                            <span class="adaptation-section__title">改编补充要求（可选）</span>
+                        </div>
+                        <div class="adaptation-section__body">
+                            <input id="adaptation-user-note" class="workflow-input" type="text" placeholder="可写核心梗改写，也可写热点方向；拿不准可以不填">
+                            <div class="adaptation-note-presets">
+                                <button class="btn btn-secondary btn-secondary--small" type="button" onclick="applyAdaptationRequirementPreset('把原核心梗换成新的表达切口')">换核心梗</button>
+                                <button class="btn btn-secondary btn-secondary--small" type="button" onclick="applyAdaptationRequirementPreset('切入当下热点，加入直播舆论')">加热点</button>
+                                <button class="btn btn-secondary btn-secondary--small" type="button" onclick="applyAdaptationRequirementPreset('保留原结构，做新包装')">保留原结构做新包装</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 补充要求 -->
-                    <div class="adaptation-section">
-                        <div class="adaptation-section__header">
-                            <span class="adaptation-section__title">补充要求（可选）</span>
+                    <div class="character-panels">
+                        <div class="character-panel character-panel--original">
+                            <div class="character-panel__header">
+                                <div class="character-panel__title">原始人物小传</div>
+                                <div class="character-panel__meta" id="original-characters-meta">可编辑 · 0 字</div>
+                            </div>
+                            <div class="textarea-wrapper">
+                                <textarea id="original-characters-display" class="workflow-textarea workflow-textarea--md" data-counter-target="original-characters-meta" spellcheck="false" placeholder="解析后会自动填入原始人物小传，也可以手动粘贴/编辑。"></textarea>
+                            </div>
+                            <div class="skip-info-box" id="skip-character-info">
+                                <div class="skip-info-label">将使用原始人物小传</div>
+                                <div class="skip-info-value" id="skip-character-value">—</div>
+                            </div>
                         </div>
-                        <div class="adaptation-section__body">
-                            <input id="genre-user-note" class="workflow-input" type="text" placeholder="例如：偏现实向、冲突更狠">
+
+                        <div class="character-panel character-panel--generated" id="generated-characters-area">
+                            <div class="character-panel__header">
+                                <div class="character-panel__title">AI生成候选人物小传（可编辑）</div>
+                                <div class="character-panel__meta" id="new-character-bios-meta">可编辑 · 0 字</div>
+                            </div>
+                            <div class="textarea-wrapper">
+                                <textarea id="new-character-bios" class="workflow-textarea workflow-textarea--xl" data-counter-target="new-character-bios-meta" spellcheck="false" placeholder="点击右上角“生成候选”后，AI 候选人物小传会显示在这里。"></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 统一确认按钮 -->
-                    <div class="button-group button-group--left" style="margin-top:24px;">
-                        <button class="btn btn-primary" id="confirm-adaptation-btn" onclick="confirmAdaptationSettings()" disabled>
-                            <span class="btn-icon">➡️</span>
-                            <span class="btn-text">确认改编设定，进入人物替换</span>
-                            <span class="btn-glow"></span>
-                        </button>
+                    <div class="name-replace-tools" id="name-replace-tool">
+                        <div class="name-replace-tool name-replace-tool--original">
+                            <div class="field-label">原始人物小传 · 姓名替换</div>
+                            <div class="name-replace-row">
+                                <input id="old-name-input-original" class="workflow-input" type="text" placeholder="原名">
+                                <span class="name-replace-arrow">→</span>
+                                <input id="new-name-input-original" class="workflow-input" type="text" placeholder="新名">
+                                <button class="btn btn-secondary" onclick="batchReplaceName('original')">
+                                    <span class="btn-text">替换</span>
+                                </button>
+                            </div>
+                            <div class="name-replace-result" id="name-replace-result-original"></div>
+                        </div>
+                        <div class="name-replace-tool name-replace-tool--generated">
+                            <div class="field-label">AI候选人物小传 · 姓名替换</div>
+                            <div class="name-replace-row">
+                                <input id="old-name-input-generated" class="workflow-input" type="text" placeholder="原名">
+                                <span class="name-replace-arrow">→</span>
+                                <input id="new-name-input-generated" class="workflow-input" type="text" placeholder="新名">
+                                <button class="btn btn-secondary" onclick="batchReplaceName('generated')">
+                                    <span class="btn-text">替换</span>
+                                </button>
+                                <button class="btn btn-secondary name-replace-ai-btn" type="button" onclick="smartReplaceCharacterNames('generated')">
+                                    <span class="btn-text">AI一键智能替换原有人物名称</span>
+                                </button>
+                            </div>
+                            <div class="name-replace-result" id="name-replace-result-generated"></div>
+                        </div>
                     </div>
+
+                    <button class="btn btn-primary" id="confirm-character-btn" onclick="confirmCharacters()" disabled style="display:none;">
+                        <span class="btn-text">确认人物，进入新大纲生成</span>
+                    </button>
+
                 </div>
             </section>
 
             <!-- ====== Stage 5: 人物信息替换 ====== -->
             <section class="workflow-stage" id="stage-5" style="display:none;">
-                <div class="stage-header">
-                    <div>
-                        <h2 class="stage-title">第二步 · AI改编</h2>
-                        <p class="stage-desc">你可以保持原始人物信息，也可以让AI生成新的候选人物小传。</p>
-                    </div>
-                    <div class="stage-header-actions">
-                        <button
-                            type="button"
-                            class="stage-header-toggle stage-header-toggle--save"
-                            onclick="saveCurrentStep2Draft()"
-                        >
-                            <span class="stage-header-toggle__text">保存当前进度</span>
-                            <span class="stage-header-toggle__icon">💾</span>
-                        </button>
-                        <div class="stage-badge">当前步骤</div>
-                    </div>
-                </div>
-                <div class="stage-card">
-                    <div class="field-label">原始人物小传</div>
-                    <textarea id="original-characters-display" class="workflow-textarea workflow-textarea--md" readonly></textarea>
-                    <div class="button-group button-group--left" style="margin-top:16px;">
-                        <button class="btn btn-skip" onclick="keepOriginalCharacters()">
-                            <span class="btn-icon">⏭️</span>
-                            <span class="btn-text">保持原样，使用原始人物</span>
-                        </button>
-                        <button class="btn btn-primary" onclick="generateCandidateCharacters()">
-                            <span class="btn-icon">🧬</span>
-                            <span class="btn-text">AI生成候选人物小传</span>
-                            <span class="btn-glow"></span>
-                        </button>
-                    </div>
-                    <div class="skip-info-box" id="skip-character-info">
-                        <div class="skip-info-label">将使用原始人物小传</div>
-                        <div class="skip-info-value" id="skip-character-value">—</div>
-                    </div>
-                    <div class="name-replace-tool" id="name-replace-tool">
-                        <div class="field-label">角色姓名批量替换</div>
-                        <div class="name-replace-row">
-                            <input id="old-name-input" class="workflow-input" type="text" placeholder="原始姓名">
-                            <span class="name-replace-arrow">→</span>
-                            <input id="new-name-input" class="workflow-input" type="text" placeholder="新姓名">
-                            <button class="btn btn-secondary" onclick="batchReplaceName()">
-                                <span class="btn-icon">🔄</span>
-                                <span class="btn-text">全部替换</span>
-                            </button>
-                        </div>
-                        <div class="name-replace-result" id="name-replace-result"></div>
-                    </div>
-                    <div id="generated-characters-area" style="display:none;">
-                        <div class="field-label" style="margin-top:18px;">AI生成的候选人物小传（可编辑）</div>
-                        <textarea id="new-character-bios" class="workflow-textarea workflow-textarea--xl" spellcheck="false"></textarea>
-                    </div>
-                    <div class="button-group button-group--left" style="margin-top:20px;">
-                        <button class="btn btn-primary" id="confirm-character-btn" onclick="confirmCharacters()" disabled>
-                            <span class="btn-icon">➡️</span>
-                            <span class="btn-text">确认人物，进入新大纲生成</span>
-                            <span class="btn-glow"></span>
-                        </button>
-                    </div>
+                <div class="stage-card stage-card--muted">
+                    <div class="summary-text">人物替换已合并到改编设定页。</div>
                 </div>
             </section>
 
@@ -531,25 +564,8 @@
                     </div>
                 </div>
                 <div class="stage-card">
-                    <div class="selection-toolbar">
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">世界观</span>
-                            <span class="selection-toolbar__value" id="outline-worldview-label">—</span>
-                        </div>
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">题材</span>
-                            <span class="selection-toolbar__value" id="outline-genre-label">—</span>
-                        </div>
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">频道</span>
-                            <span class="selection-toolbar__value" id="outline-audience-label">—</span>
-                        </div>
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">核心场景</span>
-                            <span class="selection-toolbar__value" id="outline-scene-label">—</span>
-                        </div>
-                    </div>
-                    <div class="button-group button-group--left" style="margin-top:20px;">
+                    <p class="stage-card__hint" style="margin:0 0 16px;color:var(--figma-muted);font-size:0.85rem;">改编设定已确认，请查看顶部导航栏确认选择，然后生成新大纲。</p>
+                    <div class="button-group button-group--left">
                         <button class="btn btn-primary" onclick="generateNewOutline()">
                             <span class="btn-icon">📝</span>
                             <span class="btn-text">生成新大纲</span>
@@ -557,11 +573,13 @@
                         </button>
                     </div>
                 </div>
-                <div class="stage-card stage-result" id="new-outline-result-card" style="display:none;">
+                <div class="stage-card stage-result" id="new-outline-result-card">
                     <div class="structured-grid structured-grid--result">
                         <div class="structured-field structured-field--full">
                             <label class="field-label" for="new-outline-text">新大纲（可编辑）</label>
-                            <textarea id="new-outline-text" class="workflow-textarea workflow-textarea--xl" spellcheck="false"></textarea>
+                            <div class="textarea-wrapper">
+                                <textarea id="new-outline-text" class="workflow-textarea workflow-textarea--xl" spellcheck="false"></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="button-group button-group--left">
@@ -597,7 +615,15 @@
                         <div class="stage-badge">当前步骤</div>
                     </div>
                 </div>
-                <div class="stage-card">
+
+                <!-- 输入配置区（可折叠） -->
+                <div class="stage-card stage-card--collapsible" id="step3-config-card">
+                    <div class="collapsible-header" onclick="toggleStep3Config()">
+                        <span class="collapsible-header__icon" id="step3-config-arrow">▼</span>
+                        <span class="collapsible-header__title">输入配置</span>
+                        <span class="collapsible-header__hint" id="step3-config-hint">最终框架、标题与生成接口</span>
+                    </div>
+                    <div class="collapsible-body" id="step3-config-body">
                     <label class="field-label" for="rewrite-framework-text">最终框架输入</label>
                     <div class="textarea-wrapper">
                         <textarea id="rewrite-framework-text" class="workflow-textarea workflow-textarea--xl" placeholder="你可以直接粘贴已有最终框架，单独使用 AI重写模块；如果是从第二步进入，这里会自动带入当前框架。" spellcheck="false"></textarea>
@@ -622,14 +648,9 @@
                         <div class="structured-field">
                             <label class="field-label" for="novel-model-select">生成接口</label>
                             <select id="novel-model-select" class="workflow-input">
-                                <option value="volcengine">火山引擎</option>
+                                <option value="volc">火山方舟 DeepSeek</option>
+                                <option value="doubao">豆包 Seed Character</option>
                             </select>
-                        </div>
-                        <div class="structured-field structured-field--full">
-                            <label class="field-label" for="novel-enable-polish">
-                                <input id="novel-enable-polish" type="checkbox" checked style="margin-right:8px;">
-                                生成后自动润色
-                            </label>
                         </div>
                     </div>
                     <div class="button-group button-group--left">
@@ -639,121 +660,72 @@
                             <span class="btn-glow"></span>
                         </button>
                     </div>
+                    </div><!-- .collapsible-body -->
                 </div>
 
                 <div class="stage-card stage-result" id="novel-generation-card" style="display:none;">
-                    <div class="selection-toolbar">
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">生成状态</span>
-                            <span class="selection-toolbar__value" id="novel-job-status">等待开始</span>
+                    <!-- 顶部写作工具栏 -->
+                    <div class="write-toolbar" id="write-toolbar">
+                        <div class="write-toolbar__row">
+                            <button class="write-toolbar__sidebar-toggle" id="chapter-sidebar-toggle-btn" onclick="toggleChapterSidebar()" title="折叠/展开章节列表">
+                                <span>☰</span>
+                            </button>
+                            <div class="write-toolbar__chapter-info">
+                                <input id="chapter-editor-title" class="write-toolbar__chapter-title" type="text" readonly value="未选择">
+                                <span class="write-toolbar__sep">·</span>
+                                <input id="chapter-editor-word-count" class="write-toolbar__stat" type="text" readonly value="0 字">
+                                <span class="write-toolbar__sep">·</span>
+                                <input id="chapter-editor-save-status" class="write-toolbar__stat" type="text" readonly value="未保存">
+                            </div>
+                            <div class="write-toolbar__spacer"></div>
+                            <button class="chapter-toolbtn" id="chapter-follow-toggle-btn" onclick="toggleChapterAutoFollow()" title="自动跟随生成">
+                                <span class="btn-icon">◎</span>
+                                <span class="btn-text">跟随</span>
+                            </button>
+                            <button class="chapter-toolbtn" onclick="copyCurrentChapterDraft()" title="复制当前章">
+                                <span class="btn-icon">⧉</span>
+                                <span class="btn-text">复制</span>
+                            </button>
+                            <button class="chapter-toolbtn chapter-toolbtn--primary" onclick="saveCurrentChapterDraft(true)" title="保存当前章">
+                                <span class="btn-icon">▣</span>
+                                <span class="btn-text">保存</span>
+                            </button>
+                            <button class="chapter-toolbtn chapter-toolbtn--warn" onclick="regenerateCurrentChapter()" title="重生成当前章">
+                                <span class="btn-icon">↻</span>
+                                <span class="btn-text">重生成</span>
+                            </button>
+                            <button class="chapter-toolbtn chapter-toolbtn--warn" id="stop-generation-btn" onclick="stopGeneration()" style="display:none;" title="中断生成">
+                                <span class="btn-icon">⏹</span>
+                                <span class="btn-text">中断</span>
+                            </button>
                         </div>
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">完成章节</span>
-                            <span class="selection-toolbar__value" id="novel-job-progress">0 / 10</span>
+                        <div class="write-toolbar__plot-row">
+                            <span id="write-toolbar-plot" class="write-toolbar__plot"></span>
                         </div>
-                        <div class="selection-toolbar__item">
-                            <span class="selection-toolbar__label">当前章节</span>
-                            <span class="selection-toolbar__value" id="novel-job-current-chapter">—</span>
-                        </div>
+                        <span class="chapter-editor-card__meta" id="chapter-editor-meta" style="display:none;"></span>
+                        <span id="novel-job-current-chapter" style="display:none;">—</span>
+                        <span id="novel-job-status" style="display:none;">等待开始</span>
+                        <span id="novel-job-progress" style="display:none;">0/10</span>
                     </div>
-                    <div class="chapter-draft-grid" id="chapter-draft-list"></div>
+
                     <div class="chapter-workspace">
-                        <div class="chapter-editor-card chapter-editor-card--main">
-                            <div class="chapter-editor-card__header">
-                                <div>
-                                    <div class="field-label" style="margin-bottom:6px;">章节编辑窗口</div>
-                                    <div class="chapter-editor-card__meta" id="chapter-editor-meta">生成后可在这里实时查看并修改每章正文</div>
-                                </div>
-                                <div class="chapter-toolstrip" aria-label="章节操作">
-                                    <button class="chapter-toolbtn" id="chapter-follow-toggle-btn" onclick="toggleChapterAutoFollow()" title="自动跟随生成">
-                                        <span class="btn-icon">◎</span>
-                                        <span class="btn-text">跟随</span>
-                                    </button>
-                                    <button class="chapter-toolbtn" onclick="copyCurrentChapterDraft()" title="复制当前章">
-                                        <span class="btn-icon">⧉</span>
-                                        <span class="btn-text">复制</span>
-                                    </button>
-                                    <button class="chapter-toolbtn chapter-toolbtn--primary" onclick="saveCurrentChapterDraft(true)" title="保存当前章">
-                                        <span class="btn-icon">▣</span>
-                                        <span class="btn-text">保存</span>
-                                    </button>
-                                    <button class="chapter-toolbtn chapter-toolbtn--warn" onclick="regenerateCurrentChapter()" title="重生成当前章">
-                                        <span class="btn-icon">↻</span>
-                                        <span class="btn-text">重生成</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="structured-grid structured-grid--result">
-                                <div class="structured-field">
-                                    <label class="field-label" for="chapter-editor-title">当前章节</label>
-                                    <input id="chapter-editor-title" class="workflow-input" type="text" readonly value="未选择">
-                                </div>
-                                <div class="structured-field">
-                                    <label class="field-label" for="chapter-editor-word-count">当前章字数</label>
-                                    <input id="chapter-editor-word-count" class="workflow-input" type="text" readonly value="0 字">
-                                </div>
-                                <div class="structured-field">
-                                    <label class="field-label" for="chapter-editor-save-status">保存状态</label>
-                                    <input id="chapter-editor-save-status" class="workflow-input" type="text" readonly value="未保存">
-                                </div>
-                                <div class="structured-field structured-field--full">
-                                    <label class="field-label" for="chapter-editor-text">章节正文（可随时修改）</label>
-                                    <textarea id="chapter-editor-text" class="workflow-textarea workflow-textarea--xl" spellcheck="false" placeholder="生成开始后，这里会显示当前章节正文；你可以直接修改。"></textarea>
-                                </div>
+                        <!-- 左侧：章节列表（可折叠） -->
+                        <div class="chapter-sidebar" id="chapter-sidebar">
+                            <div class="chapter-sidebar__label">章节列表</div>
+                            <div class="chapter-draft-list-vertical" id="chapter-draft-list"></div>
+                            <button class="chapter-sidebar__config-toggle" id="step3-config-quick-toggle" onclick="toggleStep3Config()" title="展开/收起输入配置">
+                                <span class="btn-icon">⚙</span>
+                                <span class="btn-text">输入配置</span>
+                            </button>
+                        </div>
+
+                        <!-- 中间：编辑器 -->
+                        <div class="chapter-editor-area">
+                            <div class="chapter-editor-card chapter-editor-card--main chapter-editor-card--bare">
+                                <textarea id="chapter-editor-text" class="workflow-textarea workflow-textarea--xl chapter-editor-textarea--full" spellcheck="false" placeholder="生成开始后，这里会显示当前章节正文；你可以直接修改。"></textarea>
                             </div>
                         </div>
 
-                        <!-- AI 改写浮动按钮 -->
-                        <button id="ai-rewrite-float-btn" class="ai-rewrite-float-btn" type="button" title="AI 改写选中段落">
-                            <span>✨</span>
-                            <span>AI 改写</span>
-                        </button>
-
-                        <!-- AI 改写弹窗 -->
-                        <div id="ai-rewrite-modal-overlay" class="rewrite-modal-overlay">
-                            <div class="rewrite-modal">
-                                <div class="rewrite-modal__header">
-                                    <div class="rewrite-modal__title">AI 改写</div>
-                                    <button class="rewrite-modal__close" type="button" onclick="closeRewriteModal()">✕</button>
-                                </div>
-                                <div>
-                                    <div class="rewrite-modal__label">原文段落</div>
-                                    <textarea id="ai-rewrite-preview" class="rewrite-modal__preview" readonly></textarea>
-                                </div>
-                                <div>
-                                    <div class="rewrite-modal__label">修改意见</div>
-                                    <textarea id="ai-rewrite-instruction" class="rewrite-modal__input" placeholder="例如：让这段更紧张刺激，增加人物内心独白"></textarea>
-                                </div>
-                                <div class="rewrite-modal__actions">
-                                    <button class="rewrite-modal__btn rewrite-modal__btn--secondary" type="button" onclick="closeRewriteModal()">取消</button>
-                                    <button class="rewrite-modal__btn rewrite-modal__btn--primary" type="button" id="ai-rewrite-submit-btn" onclick="submitRewriteSelection()">发送</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <aside class="chapter-context-panel">
-                            <div class="chapter-context-tabs" role="tablist" aria-label="写作资料">
-                                <button class="chapter-context-tab is-active" type="button" data-context-tab="reference" onclick="setGenerationInfoTab('reference')">参考</button>
-                                <button class="chapter-context-tab" type="button" data-context-tab="blueprint" onclick="setGenerationInfoTab('blueprint')">蓝图</button>
-                            </div>
-                            <div class="chapter-context-pane is-active" data-context-pane="reference">
-                                <div class="chapter-context-title">当前章参考爆款片段</div>
-                                <div class="chapter-editor-card__meta" id="chapter-reference-meta">生成当前章时检索到的参考片段会显示在这里。</div>
-                                <div class="context-section-heading">场景卡</div>
-                                <div id="chapter-scene-card-view" class="scene-card-view">
-                                    <div class="context-empty">场景卡生成后会显示在这里。</div>
-                                </div>
-                                <div class="context-section-heading">参考片段</div>
-                                <div id="chapter-reference-view" class="reference-card-list">
-                                    <div class="context-empty">当前章参考到的爆款小说片段会显示在这里。</div>
-                                </div>
-                            </div>
-                            <div class="chapter-context-pane" data-context-pane="blueprint">
-                                <div class="chapter-context-title">生成蓝图</div>
-                                <div class="chapter-editor-card__meta">故事蓝图会跟随生成任务自动更新。</div>
-                                <div id="novel-blueprint-view" class="blueprint-summary-view"></div>
-                            </div>
-                        </aside>
                     </div>
                 </div>
 
@@ -790,7 +762,273 @@
                     </div>
                 </div>
             </section>
+
+            <!-- ============================================ -->
+            <!-- Stage 8: 导语优化 -->
+            <!-- ============================================ -->
+            <section class="workflow-stage" id="stage-8" style="display:none;">
+                <div class="stage-header">
+                    <div>
+                        <h2 class="stage-title">第四步 · 导语优化</h2>
+                        <p class="stage-desc">把正文开头压缩成可发布导语，候选第一句、整体编排、逐句润色都在右侧面板中承接。</p>
+                    </div>
+                    <div class="stage-header-actions">
+                        <button type="button" class="stage-header-toggle stage-header-toggle--save" onclick="saveCurrentStep4Draft()">
+                            <span class="stage-header-toggle__text">保存导语</span>
+                            <span class="stage-header-toggle__icon">💾</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="intro-workbench">
+                    <section class="intro-editor-main stage-card">
+                        <label class="field-label" for="intro-edit-original">原始导语</label>
+                        <div class="textarea-wrapper intro-original-wrapper">
+                            <textarea id="intro-edit-original" class="workflow-textarea workflow-textarea--md" rows="6" placeholder="从正文生成阶段自动带入，也可手动粘贴..." spellcheck="false"></textarea>
+                        </div>
+                        <div class="intro-toolbar" aria-label="导语优化步骤操作">
+                            <button class="intro-tool-btn is-active" id="intro-edit-step1-btn" onclick="introEditStep1Generate()">
+                                <span>01</span>生成第一句
+                            </button>
+                            <button class="intro-tool-btn" id="intro-edit-confirm-step1-btn" onclick="introEditConfirmStep1()" style="display:none;">
+                                <span>02</span>整体编排
+                            </button>
+                            <button class="intro-tool-btn" id="intro-edit-confirm-step2-btn" onclick="introEditConfirmStep2()" style="display:none;">
+                                <span>03</span>逐句润色
+                            </button>
+                        </div>
+                        <label class="field-label" for="intro-edit-step3-text" style="margin-top:16px;">最终导语（可编辑）</label>
+                        <div class="textarea-wrapper intro-final-wrapper">
+                            <textarea id="intro-edit-step3-text" class="workflow-textarea workflow-textarea--lg" rows="8" placeholder="点击上方步骤后，生成内容会在这里逐步成稿，也可以直接微调保存。" spellcheck="false"></textarea>
+                        </div>
+                        <div class="button-group button-group--left">
+                            <button class="btn btn-primary intro-action-btn" onclick="saveCurrentStep4Draft()">保存导语</button>
+                            <button class="btn btn-secondary intro-action-btn" onclick="copyEditedIntro()">复制导语</button>
+                        </div>
+                    </section>
+                    <aside class="intro-side-panel stage-card">
+                        <div class="intro-edit-step-bar" id="intro-edit-step-bar">
+                            <span class="intro-edit-step is-active" data-intro-step="1">第一句</span>
+                            <span class="intro-edit-step" data-intro-step="2">编排</span>
+                            <span class="intro-edit-step" data-intro-step="3">润色</span>
+                        </div>
+                        <div class="intro-panel-section" id="intro-edit-step1-card" style="display:none;">
+                            <div class="intro-panel-title">候选第一句</div>
+                            <div id="intro-edit-step1-result" class="intro-edit-result prose"></div>
+                        </div>
+                        <div class="intro-panel-section" id="intro-edit-step2-card" style="display:none;">
+                            <div class="intro-panel-title">整体编排</div>
+                            <div class="intro-substep-bar" aria-label="整体编排小步骤">
+                                <span class="intro-substep-chip">01 衔接</span>
+                                <span class="intro-substep-chip">02 转折</span>
+                            </div>
+                            <div id="intro-edit-step2-header" class="intro-edit-result prose"></div>
+                            <div class="textarea-wrapper">
+                                <textarea id="intro-edit-step2-text" class="workflow-textarea workflow-textarea--md" rows="8" placeholder="编排结果将显示在此处..." spellcheck="false"></textarea>
+                            </div>
+                            <div id="intro-edit-step2-info" class="intro-edit-info prose"></div>
+                        </div>
+                        <div class="intro-panel-section" id="intro-edit-step3-card" style="display:none;">
+                            <div class="intro-panel-title">逐句润色记录</div>
+                            <div id="intro-edit-step3-header" class="intro-edit-result prose"></div>
+                            <div id="intro-edit-step3-info" class="intro-edit-info prose"></div>
+                        </div>
+                        <div class="intro-panel-empty" id="intro-panel-empty">生成后会在这里展开候选、编排说明和逐句润色记录。</div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- ============================================ -->
+            <!-- Stage 9: 导语定制（并行逆工作流） -->
+            <!-- ============================================ -->
+            <section class="workflow-stage" id="stage-9" style="display:none;">
+                <div class="stage-header">
+                    <div>
+                        <h2 class="stage-title">导语定制 · 逆工作流</h2>
+                        <p class="stage-desc">并行模式：直接根据作者导语生成完整拆解式梗概（含【一】到【八】）；原四步工作流保持不变。</p>
+                    </div>
+                    <div class="stage-header-actions">
+                        <div class="stage-badge">并行模式</div>
+                    </div>
+                </div>
+
+                <div class="reverse-intro-layout">
+                    <section class="stage-card reverse-intro-input-card">
+                        <div class="structured-grid">
+                            <div class="structured-field structured-field--full">
+                                <label class="field-label" for="reverse-intro-input">导语样例</label>
+                                <textarea id="reverse-intro-input" class="workflow-textarea workflow-textarea--xl" rows="12" placeholder="粘贴作者给出的导语，系统会直接生成与第一步一致格式的10章拆解稿..." spellcheck="false"></textarea>
+                            </div>
+                            <div class="structured-field">
+                                <label class="field-label" for="reverse-intro-chapter-count">框架章节数</label>
+                                <select id="reverse-intro-chapter-count" class="workflow-input workflow-select">
+                                    <option value="10" selected>固定10章（同第一步）</option>
+                                </select>
+                            </div>
+                            <div class="structured-field">
+                                <label class="field-label" for="reverse-intro-model-select">生成接口</label>
+                                <select id="reverse-intro-model-select" class="workflow-input workflow-select">
+                                    <option value="volcengine">火山方舟 DeepSeek</option>
+                                    <option value="doubao-seeding">豆包 seeding 模型</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="button-group button-group--left">
+                            <button class="btn btn-primary" type="button" onclick="reverseIntroGeneratePlan()">
+                                <span class="btn-icon">🧭</span>
+                                <span class="btn-text">生成梗概</span>
+                                <span class="btn-glow"></span>
+                            </button>
+                            <button class="btn btn-secondary" type="button" onclick="reverseIntroUseFrameworkForAdaptation()">
+                                <span class="btn-icon">📥</span>
+                                <span class="btn-text">带入 AI改编</span>
+                            </button>
+                            <button class="btn btn-secondary" type="button" onclick="reverseIntroUseFrameworkForWriting()">
+                                <span class="btn-icon">📥</span>
+                                <span class="btn-text">带入 AI重写</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="stage-card reverse-intro-output-card">
+                        <div class="selection-toolbar">
+                            <div class="selection-toolbar__item">
+                                <span class="selection-toolbar__label">模式</span>
+                                <span class="selection-toolbar__value">导语定制</span>
+                            </div>
+                            <div class="selection-toolbar__item">
+                                <span class="selection-toolbar__label">当前状态</span>
+                                <span class="selection-toolbar__value" id="reverse-intro-status">等待输入</span>
+                            </div>
+                        </div>
+                        <div class="reverse-intro-panel reverse-intro-panel--wide">
+                            <div class="reverse-intro-panel__title">完整拆解式梗概</div>
+                            <textarea id="reverse-intro-framework" class="workflow-textarea workflow-textarea--xl" rows="18" placeholder="生成后显示与第一步一致的拆解稿：包含固定八大模块与10章大纲。可编辑后带入 AI改编 或 AI重写。" spellcheck="false"></textarea>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
             </div>
+
+            <aside class="editor-assist-panel" id="editor-assist-panel" aria-label="编辑辅助面板">
+                <div class="editor-assist-panel__header">
+                    <div>
+                        <div class="editor-assist-panel__eyebrow">Editor Assist</div>
+                        <div class="editor-assist-panel__title">参考与建议</div>
+                    </div>
+                    <button
+                        type="button"
+                        class="editor-assist-panel__toggle"
+                        id="editor-assist-toggle"
+                        onclick="toggleEditorAssistCollapse()"
+                        aria-label="收起或展开编辑辅助面板"
+                    >›</button>
+                </div>
+                <div class="editor-assist-body">
+                    <section class="editor-assist-section is-active" data-editor-panel="references">
+                        <div class="editor-assist-section__header">
+                            <span class="editor-assist-section__icon">&#x1F4D6;</span>
+                            <span class="editor-assist-section__label">参考导航</span>
+                        </div>
+                        <div class="editor-assist-actions">
+                            <button type="button" class="editor-assist-action" onclick="toggleHistoryReferencePanel()">
+                                <span class="editor-assist-action__icon">&#x1F4C2;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">历史爆款参考</span>
+                                    <span class="editor-assist-action__hint">查看近 7 天上榜样本</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                            <button type="button" class="editor-assist-action" onclick="enterModule('adapt')">
+                                <span class="editor-assist-action__icon">&#x1F4DD;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">拆解输入</span>
+                                    <span class="editor-assist-action__hint">检查原始拆解框架</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                            <button type="button" class="editor-assist-action" onclick="enterModule('write')">
+                                <span class="editor-assist-action__icon">&#x1F4C4;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">最终框架</span>
+                                    <span class="editor-assist-action__hint">确认 AI 重写所用的框架</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                        </div>
+                        <div class="editor-assist-reference-area" id="editor-assist-reference-area">
+                            <div class="editor-assist-reference-area__label">当前章节参考片段</div>
+                            <div class="editor-assist-reference-view" id="editor-assist-reference-view">
+                                <div class="context-empty">选中章节后可查看对应参考片段</div>
+                            </div>
+                            <div class="editor-assist-reference-meta" id="editor-assist-reference-meta"></div>
+                        </div>
+                    </section>
+                    <section class="editor-assist-section" data-editor-panel="profile">
+                        <div class="editor-assist-section__header">
+                            <span class="editor-assist-section__icon">&#x1F464;</span>
+                            <span class="editor-assist-section__label">人物与设定</span>
+                            <span class="editor-assist-section__badge">3</span>
+                        </div>
+                        <div class="editor-assist-actions">
+                            <button type="button" class="editor-assist-action" onclick="switchToStep(4)">
+                                <span class="editor-assist-action__icon">&#x2699;&#xFE0F;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">改编设定</span>
+                                    <span class="editor-assist-action__hint">世界观 / 题材 / 场景</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                            <button type="button" class="editor-assist-action" onclick="switchToStep(5)">
+                                <span class="editor-assist-action__icon">&#x270F;&#xFE0F;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">人物替换</span>
+                                    <span class="editor-assist-action__hint">原名 &rarr; 新名批量替换</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                            <button type="button" class="editor-assist-action" onclick="switchToStep(6)">
+                                <span class="editor-assist-action__icon">&#x1F4CB;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">新大纲</span>
+                                    <span class="editor-assist-action__hint">生成并确认改编后大纲</span>
+                                </span>
+                                <span class="editor-assist-action__arrow">&rarr;</span>
+                            </button>
+                        </div>
+                    </section>
+                    <section class="editor-assist-section" data-editor-panel="suggestions">
+                        <div class="editor-assist-section__header">
+                            <span class="editor-assist-section__icon">&#x1F4A1;</span>
+                            <span class="editor-assist-section__label">快捷技巧</span>
+                        </div>
+                        <div class="editor-assist-actions">
+                            <button type="button" class="editor-assist-action" onclick="saveCurrentStep3Draft()">
+                                <span class="editor-assist-action__icon">&#x1F4BE;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">先保存再生成</span>
+                                    <span class="editor-assist-action__hint">避免进度丢失</span>
+                                </span>
+                            </button>
+                            <button type="button" class="editor-assist-action" onclick="useCurrentFrameworkForWriting()">
+                                <span class="editor-assist-action__icon">&#x1F4E5;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">带入当前框架</span>
+                                    <span class="editor-assist-action__hint">大纲确认后直达正文生成</span>
+                                </span>
+                            </button>
+                            <button type="button" class="editor-assist-action editor-assist-action--soft" onclick="toggleEditorAssistCollapse()">
+                                <span class="editor-assist-action__icon">&#x25C0;</span>
+                                <span class="editor-assist-action__body">
+                                    <span class="editor-assist-action__label">收起辅助面板</span>
+                                    <span class="editor-assist-action__hint">右侧面板可随时展开</span>
+                                </span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </aside>
         </div>
     </div>
 
@@ -822,12 +1060,42 @@
         </div>
     </div>
 
+    <!-- AI 改写浮动按钮（挂到 body 下，避免祖先包含块影响 position:fixed） -->
+    <button id="ai-rewrite-float-btn" class="ai-rewrite-float-btn" type="button" title="AI 改写选中段落">
+        <span>✨</span>
+        <span>AI 改写</span>
+    </button>
+
+    <!-- AI 改写弹窗 -->
+    <div id="ai-rewrite-modal-overlay" class="rewrite-modal-overlay">
+        <div class="rewrite-modal">
+            <div class="rewrite-modal__header">
+                <div class="rewrite-modal__title">AI 改写</div>
+                <button class="rewrite-modal__close" type="button" onclick="closeRewriteModal()">✕</button>
+            </div>
+            <div>
+                <div class="rewrite-modal__label">原文段落</div>
+                <textarea id="ai-rewrite-preview" class="rewrite-modal__preview" readonly></textarea>
+            </div>
+            <div>
+                <div class="rewrite-modal__label">修改意见</div>
+                <textarea id="ai-rewrite-instruction" class="rewrite-modal__input" placeholder="例如：让这段更紧张刺激，增加人物内心独白"></textarea>
+            </div>
+            <div class="rewrite-modal__actions">
+                <button class="rewrite-modal__btn rewrite-modal__btn--secondary" type="button" onclick="closeRewriteModal()">取消</button>
+                <button class="rewrite-modal__btn rewrite-modal__btn--primary" type="button" id="ai-rewrite-submit-btn" onclick="submitRewriteSelection()">发送</button>
+            </div>
+        </div>
+    </div>
+
     <script src="mock-api.js"></script>
-    <script src="js/workflow/common.js?v=20260430-context-cards"></script>
-    <script src="js/workflow/task1-split.js?v=20260430-context-cards"></script>
-    <script src="js/workflow/task2-adapt.js?v=20260430-context-cards"></script>
-    <script src="js/workflow/task3-write.js?v=20260430-context-cards"></script>
-    <script src="js/workflow/init.js?v=20260430-context-cards"></script>
-<div id="demo-banner" style="position:fixed;z-index:99999;left:50%;transform:translateX(-50%);bottom:14px;max-width:92vw;background:rgba(10,16,28,.95);color:#e0e6ed;border:1px solid #00d4ff55;padding:9px 38px 9px 16px;border-radius:10px;font:13px/1.6 system-ui;box-shadow:0 6px 20px rgba(0,0,0,.35)">在线演示：界面是实习项目的真实前端，数据为原创示例、输出为固定样例，不调用模型。依次点击 <b>AI 拆解</b> → <b>解析</b> → 改编设定 → <b>生成新大纲</b> → <b>逐章生成</b>，可在右侧查看每章的场景卡和检索到的参考片段。<a href="../../projects/wenci.html" style="color:#00d4ff;margin-left:6px">返回项目页</a><button onclick="this.parentNode.remove()" aria-label="关闭说明" style="position:absolute;right:8px;top:6px;background:none;border:0;color:#8892a4;font-size:18px;cursor:pointer">×</button></div>
+    <script src="js/workflow/common.js?v=20260623-workflow-main"></script>
+    <script src="js/workflow/task1-split.js?v=20260617-split-guard"></script>
+    <script src="js/workflow/task2-adapt.js?v=20260617-split-guard"></script>
+    <script src="js/workflow/task3-write.js?v=20260617-split-guard"></script>
+    <script src="js/workflow/task4-intro-edit.js?v=20260617-split-guard"></script>
+    <script src="js/workflow/reverse-intro/index.js?v=20260623-reverse-intro-merge"></script>
+    <script src="js/workflow/init.js?v=20260617-split-guard"></script>
+<div id="demo-banner" style="position:fixed;z-index:99999;left:50%;transform:translateX(-50%);bottom:14px;max-width:92vw;background:rgba(10,16,28,.95);color:#e0e6ed;border:1px solid #00d4ff55;padding:9px 38px 9px 16px;border-radius:10px;font:13px/1.6 system-ui;box-shadow:0 6px 20px rgba(0,0,0,.35)">在线演示：界面是实习项目最终版（v3）的真实前端，数据为原创示例、输出为固定样例，不调用模型。可以从首页任选一个入口，或按 拆解 → 改编 → 重写 → 导语优化 走完一遍。<a href="../../projects/wenci.html" style="color:#00d4ff;margin-left:6px">返回项目页</a><button onclick="this.parentNode.remove()" aria-label="关闭说明" style="position:absolute;right:8px;top:6px;background:none;border:0;color:#8892a4;font-size:18px;cursor:pointer">×</button></div>
 </body>
 </html>

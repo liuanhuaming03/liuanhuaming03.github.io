@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文辞 AI · 单章检索链路演示</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row button[aria-pressed=true]{background:var(--accent);color:#fff}
+.query{font:13px/1.6 var(--mono);background:#17201b;color:#d5e6cf;border-radius:10px;padding:12px;white-space:pre-wrap;margin-top:10px}
+.stages{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+@media (max-width:760px){.stages{grid-template-columns:1fr}}
+.stage{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;background:#fff;opacity:.55}
+.stage.hit{opacity:1;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.stage.skip{opacity:.35;text-decoration:line-through}
+.stage b{display:block;font-size:13px}
+.stage .f{color:var(--muted);font-size:12px;margin:4px 0}
+.stage .n{font:600 13px var(--mono)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12.5px}
+td.num{font-family:var(--mono);white-space:nowrap}
+tr.drop td{color:#9aa39c;text-decoration:line-through}
+tr.keep td:first-child{border-left:3px solid var(--accent)}
+.why{font-size:12px;color:#8a3a1d}
+.budget{height:14px;border-radius:99px;background:#e8ebe2;overflow:hidden;display:flex;margin-top:10px}
+.budget span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.diag{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:760px){.diag{grid-template-columns:1fr}}
+.diag div{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;font-size:14px}
+.diag div.on{border-color:#b44c2b;background:#fbf1ec}
+.diag b{display:block;margin-bottom:4px}
+.formula{font:13px var(--mono);background:var(--accent-soft);padding:8px 12px;border-radius:8px;display:inline-block;margin-top:8px}
+</style>
+</head>
+<body>
+<header class="topnav"><div class="wrap"><a class="brand" href="../../index.html">阮景怡<small>项目作品集</small></a><nav><a href="../../projects/wenci.html">返回项目页</a></nav></div></header>
+<main class="wrap" style="padding:28px 0 40px">
+<span class="eyebrow">交互演示 · 检索链路</span>
+<h1 style="font-size:clamp(1.7rem,4vw,2.5rem)">一章正文的参考片段是怎么来的</h1>
+<p class="lead">以第 3 章“表彰会当众对质”为例，演示一路查询从构造到注入提示词的全过程。检索阈值、放宽顺序、重排公式和字符预算与项目配置一致；候选片段和分数是为演示编写的示例。</p>
+
+<section class="panel">
+<h3>① 选择一路叙事用途（共 8 路）</h3>
+<div class="row" id="labels" style="margin-top:10px"></div>
+<div class="query" id="query"></div>
+</section>
+
+<section class="panel">
+<h3>② 渐进放宽：先严后宽，凑够 4 条就停</h3>
+<p style="margin:6px 0 0;color:var(--muted);font-size:14px">每一级都在 Qdrant 里做稠密 + 稀疏两路预取、RRF 融合，再过质量过滤、重排和来源限制。</p>
+<div class="stages" id="stages"></div>
+</section>
+
+<section class="panel">
+<h3>③ 重排与来源限制</h3>
+<span class="formula">final = 0.60 × sim + 0.12 × overlap + 0.28 × (0.42 × route + 0.58 × detail)</span>
+<table id="cands"></table>
+<p style="font-size:13px;color:var(--muted);margin:8px 0 0">sim 来自 RRF 融合分；overlap 是本章剧情与候选标签的字级 n-gram 重叠；route 看片段类型是否匹配这一路；detail 看场景功能、故事阶段、情绪等标签是否命中。每本来源书在每一路最多保留 2 条。</p>
+</section>
+
+<section class="panel">
+<h3>④ 上下文组装：8 路按优先级拼接，去重，总长不超过 2500 字</h3>
+<div class="budget" id="budget"></div>
+<div class="legend" id="legend"></div>
+<p id="budgetText" style="font-size:14px;margin:8px 0 0"></p>
+</section>
+
+<section class="panel">
+<h3>⑤ 参考没起作用时，按三层定位</h3>
+<div class="row" style="margin-top:8px">
+<button class="btn" data-diag="0" aria-pressed="false">情况 A：这一路召回为空</button>
+<button class="btn" data-diag="1" aria-pressed="false">情况 B：候选有，但没进提示词</button>
+<button class="btn" data-diag="2" aria-pressed="false">情况 C：进了提示词，正文没体现</button>
+</div>
+<div class="diag" id="diag">
+<div><b>1 · 候选层</b>trace 里这一路每一级的候选数、过滤原因。为空时看标签是否过窄、库里有没有这类片段。</div>
+<div><b>2 · 注入层</b>对比候选列表和最终 rag_context。被挤掉时看优先级、去重和 2500 字预算。</div>
+<div><b>3 · 生成层</b>片段已在提示词里，正文仍没体现时，看提示词里参考段的位置和指令，以及章节规划是否与参考冲突。</div>
+</div>
+<p id="diagText" style="font-size:14px;margin:10px 0 0;color:var(--muted)">点上面的情况，查看对应的定位路径。</p>
+</section>
+<p style="margin-top:22px"><a class="btn muted" href="../../projects/wenci.html">← 返回项目页</a> <a class="btn muted" href="../wenci/index.html">打开工作台演示</a></p>
+</main>
+<script>
+const BASE = "梗概:沈知意在表彰会上当众拿出原始图纸，夺回父亲的专利署名权\n题材:年代 · 女性成长\n主角:沈知意";
+const LABELS = {
+  dialog: {name:"对话参考片段", extra:"对话触发:我爸签字的时候，已经走了三天了\n冲突语气:平静、反问、不争吵",
+    stages:[{n:0},{n:3},{n:5,hit:true},{},{}],
+    cands:[
+      ["“我不吵，我只请大家看一样东西。”","示例书 B",0.71,0.30,0.30,0.52],
+      ["“这份东西，你打算什么时候告诉我？”","示例书 C",0.66,0.22,0.26,0.40],
+      ["“你说是走流程，那流程单呢？”","示例书 B",0.63,0.25,0.30,0.38],
+      ["“我只问一句，那天你在哪？”","示例书 B",0.61,0.18,0.30,0.30],
+      ["他压低声音：“别闹了，回家再说。”","示例书 D",0.58,0.10,0.26,0.12],
+    ]},
+  action: {name:"动作描写参考片段", extra:"动作模式:展开、举起、停顿\n身体反应:手心出汗、呼吸放慢",
+    stages:[{n:4,hit:true},{},{},{},{}],
+    cands:[
+      ["她解开麻绳，把图纸一寸一寸在讲台上铺平。","示例书 A",0.69,0.34,0.30,0.48],
+      ["他把纸按原样折好，手指在抽屉边停了很久。","示例书 A",0.64,0.20,0.30,0.36],
+      ["她把单子叠成小方块，攥进手心。","示例书 E",0.62,0.16,0.30,0.32],
+      ["他一拳砸在桌上，杯子跳了起来。","示例书 D",0.57,0.08,0.30,0.18],
+      ["礼堂后排有人站起来，又被拉着坐下。","示例书 A",0.55,0.12,0.22,0.20],
+    ]},
+  hook: {name:"章尾钩子参考片段", extra:"上章悬念:转让书日期在父亲去世之后\n卡点要求:结尾收在一个动作上",
+    stages:[{n:0},{n:0},{n:0},{n:2},{n:6,hit:true}],
+    cands:[
+      ["她连信封都没拆。","示例书 B",0.60,0.20,0.30,0.44],
+      ["打印机响了一声，吐出来的那张单子上签着她的名字。","示例书 F",0.58,0.12,0.30,0.30],
+      ["落款日期那一栏，写着一个他不可能签字的日子。","示例书 C",0.57,0.26,0.30,0.38],
+      ["她把检讨书塞进炉子，火苗舔了一下纸边。","示例书 B",0.55,0.22,0.30,0.34],
+      ["门外，有人敲了三下。","示例书 G",0.50,0.04,0.22,0.10],
+    ]},
+};
+const STAGE_NAMES = [["strict_phase_function","级别 + 角色 + 故事阶段 + 场景功能"],["phase_only","去掉场景功能"],["function_only","去掉故事阶段"],["role_only","只保留内容角色"],["level_only","只保留块级别"]];
+const BUDGET = [["对话",380,"#23533c"],["动作",340,"#3b7d5a"],["情绪",300,"#6aa57e"],["环境",260,"#93c39f"],["钩子",220,"#b8e06a"],["冲突/反击",520,"#c9a227"],["叙事推进",480,"#d98a3a"],["付费卡点",420,"#c8653a"]];
+let current = "dialog";
+const $ = s => document.querySelector(s);
+function finalScore(c){const [,, sim, ov, route, detail] = c; return 0.60*sim + 0.12*ov + 0.28*(0.42*route + 0.58*detail);}
+function render(){
+  const L = LABELS[current];
+  $("#labels").innerHTML = Object.entries(LABELS).map(([k,v])=>`<button class="btn" data-l="${k}" aria-pressed="${k===current}">${v.name}</button>`).join("") + '<span style="font-size:13px;color:var(--muted)">另有情绪、环境、冲突/反击、叙事推进、付费卡点 5 路</span>';
+  $("#query").textContent = BASE + "\n" + L.extra;
+  let reached = false;
+  $("#stages").innerHTML = STAGE_NAMES.map(([id,desc],i)=>{
+    const s = L.stages[i]; let cls = "", n = "";
+    if (reached) { cls = "skip"; n = "已凑够，跳过"; }
+    else if (s.hit) { cls = "hit"; n = `召回 ${s.n} 条 → 达标，停止放宽`; reached = true; }
+    else { n = `召回 ${s.n} 条，不足 4 条 → 放宽`; }
+    return `<div class="stage ${cls}"><b>${i+1}. ${id}</b><div class="f">${desc}</div><div class="n">${n}</div></div>`;
+  }).join("");
+  const rows = L.cands.map(c=>({c, f: finalScore(c)})).sort((a,b)=>b.f-a.f);
+  const perSource = {}; let kept = 0;
+  const html = rows.map(({c,f})=>{
+    const src = c[1]; perSource[src] = (perSource[src]||0) + 1;
+    let keep = true, why = "";
+    if (perSource[src] > 2) { keep = false; why = "同一来源已有 2 条"; }
+    else if (kept >= 4) { keep = false; why = "本路已取满 4 条"; }
+    if (keep) kept++;
+    return `<tr class="${keep?"keep":"drop"}"><td>${c[0]}${why?`<div class="why">${why}</div>`:""}</td><td>${src}</td><td class="num">${c[2].toFixed(2)}</td><td class="num">${c[3].toFixed(2)}</td><td class="num">${c[4].toFixed(2)}</td><td class="num">${c[5].toFixed(2)}</td><td class="num"><b>${f.toFixed(3)}</b></td></tr>`;
+  }).join("");
+  $("#cands").innerHTML = `<tr><th>候选片段</th><th>来源</th><th>sim</th><th>overlap</th><th>route</th><th>detail</th><th>final</th></tr>` + html;
+  let total = 0, kept8 = [];
+  BUDGET.forEach(([n,len,col])=>{ if (total + len <= 2500) { total += len; kept8.push([n,len,col,true]); } else kept8.push([n,len,col,false]); });
+  $("#budget").innerHTML = kept8.filter(x=>x[3]).map(([n,len,col])=>`<span title="${n} ${len}字" style="width:${len/2500*100}%;background:${col}"></span>`).join("");
+  $("#legend").innerHTML = kept8.map(([n,len,col,ok])=>`<span style="${ok?"":"text-decoration:line-through;opacity:.6"}"><i style="background:${col}"></i>${n} ${len} 字</span>`).join("");
+  const cut = kept8.filter(x=>!x[3]).map(x=>x[0]);
+  $("#budgetText").textContent = `已注入 ${total} / 2500 字。` + (cut.length ? `「${cut.join("、")}」排在最后，超出预算被截掉——这正是“候选里有，提示词里没有”的常见原因。` : "");
+}
+const DIAG = [
+  "情况 A：看 trace 里这一路 5 级的候选数。如果全是 0，说明标签组合过窄或库里缺这类片段，最后会退回到 fallback 池里重排分最高的 1 条。改法是调整这一路的标签，或在建库阶段补这类片段。",
+  "情况 B：候选列表里有，最终 rag_context 里没有。依次看三处：是否在全域去重时被别的路占用；这一路在拼接优先级里是否靠后；是否被 2500 字预算截掉。",
+  "情况 C：片段已在提示词里，正文仍没体现。这时问题不在检索：看参考段在提示词中的位置和指令措辞，以及章节规划、场景卡是否与参考冲突（参考只提供风格和桥段，不能覆盖本书事实）。",
+];
+document.addEventListener("click", e=>{
+  const l = e.target.closest("[data-l]"); if (l) { current = l.dataset.l; render(); }
+  const d = e.target.closest("[data-diag]"); if (d) {
+    const i = +d.dataset.diag;
+    document.querySelectorAll("[data-diag]").forEach(b=>b.setAttribute("aria-pressed", String(b===d)));
+    document.querySelectorAll("#diag div").forEach((x,j)=>x.classList.toggle("on", j===i));
+    $("#diagText").textContent = DIAG[i];
+  }
+});
+render();
+</script>
+</body>
+</html>

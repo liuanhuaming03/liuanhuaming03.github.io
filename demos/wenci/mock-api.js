@@ -232,6 +232,16 @@ ${NEW_BIOS}
     },
   ];
 
+  const INTRO_TEXT = `父亲去世后的第三天，他"签"下了一份专利转让书。
+我拿着那张纸站在厂办门口，赵立诚还在催我：订亲以后去盖个章，都是走流程。
+我没吵。我只是把日期，记在了手心。`;
+
+  const INTRO_CANDIDATES = [
+    { sentence: "父亲去世后的第三天，他\u201c签\u201d下了一份专利转让书。", method_used: "时间矛盾开场", reason: "第一句就抛出不可能事件，制造悬念" },
+    { sentence: "订亲前一晚，我在未婚夫的抽屉里，看见了我爸的签名。", method_used: "关系 + 物证", reason: "亲密关系与证据并置，冲突立刻成立" },
+    { sentence: "全厂都以为我会嫁进赵家，没人想到我会在表彰会上拿出那卷图纸。", method_used: "结果前置", reason: "先给爽点结果，再回溯过程" },
+  ];
+
   const HISTORY_DETAIL = {
     title: "订婚宴上的股东会（示例）",
     book_id: "demo-001",
@@ -271,6 +281,7 @@ ${NEW_BIOS}
       blueprint: { 核心冲突: "伪造署名 vs 原始档案", 情绪曲线: "压抑 → 隐忍 → 爆发 → 释放", 主角目标: "夺回父亲的专利署名权" },
       chapter_plan: CHAPTERS.map((c) => ({ chapter: c.chapter, plot: c.plot, emotion: c.emotion, hook: c.hook })),
       chapters,
+      ...(completed ? { intro_text: INTRO_TEXT } : {}),
     };
   }
 
@@ -287,6 +298,17 @@ ${NEW_BIOS}
       return json({ task_id: "demo-task-1", title: tasks[0].title, current_step: "step1_init", input_mode: "raw_text", raw_source_text: RAW_STORY, outline_source_text: "", split_result_text: "" });
     if (/\/api\/workflow\/step[123]\/save$/.test(path)) return json({ ok: true, task_id: body.task_id || "demo-task-1" });
     if (/\/api\/workflow\/step[23]\/load$/.test(path)) return json({ task_id: "demo-task-1" });
+    if (path === "/api/workflow/task/create") { const id = "demo-task-" + Date.now(); tasks.unshift({ task_id: id, title: "新建示例任务", current_step: (body.entry_step || "step1") , current_step_status: "draft", gmt_modified: new Date().toLocaleString("zh-CN"), last_summary: "演示任务" }); return json({ ok: true, task_id: id }); }
+    if (path === "/api/workflow/task/delete") { const i = tasks.findIndex((t) => t.task_id === body.task_id); if (i >= 0) tasks.splice(i, 1); return json({ ok: true }); }
+    if (path === "/api/workflow/step4/load") return json({ task_id: "demo-task-1", title: tasks[0] ? tasks[0].title : "", original_intro_text: INTRO_TEXT });
+    if (path === "/api/workflow/step4/save") return json({ ok: true, task_id: body.task_id || "demo-task-1" });
+    if (path === "/api/workflow/step4/intro/generate_first") { await wait(900); return json({ candidates: INTRO_CANDIDATES }); }
+    if (path === "/api/workflow/step4/intro/restructure") { await wait(900); const first = body.first_sentence || INTRO_CANDIDATES[0].sentence; return json({ restructured_text: first + "\n赵立诚把转让书推到我面前，笑着说订亲后去盖个章，都是走流程。\n我没有吵，只把落款日期默默记下。\n三天后的表彰大会上，我当着全厂的面，展开了那卷原始图纸。" }); }
+    if (path === "/api/workflow/step4/intro/polish") { await wait(900); return json({ polished_text: String(body.draft_text || "").replace(/\n{2,}/g, "\n") + "\n（演示：此处返回润色后的导语）" }); }
+    if (path === "/api/pipeline/write/cancel") { const job = jobs[body.job_id]; if (job) job.started = Date.now() - 1e9; return json({ ok: true, status: "canceled" }); }
+    if (path === "/api/workflow/ai_replace_character_names") { await wait(700); const t = String(body.target_text || body.text || ""); const map = [["林栖", "沈知意"], ["周屿", "赵立诚"], ["周母", "赵母"], ["陈律师", "老周师傅"]]; let r = t; map.forEach(([a, b]) => { r = r.split(a).join(b); }); return json({ replaced_text: r, name_mappings: map.map(([a, b]) => ({ old_name: a, new_name: b, from: a, to: b })) }); }
+    if (path === "/api/reverse-intro/analyze") { await wait(800); return json({ contract: { hook: "时间矛盾", promise: "女主夺回署名权", tone: "克制反击" } }); }
+    if (path === "/api/reverse-intro/plan") { await wait(1200); return json({ framework_text: NEW_OUTLINE, tagged_setting: {}, creative_fill_options: [] }); }
     if (path === "/api/pipeline/split") { await wait(1200); return json({ split_result: SPLIT_RESULT }); }
     if (path === "/api/workflow/analyze_outline") {
       await wait(1200);
@@ -338,4 +360,25 @@ ${NEW_BIOS}
     try { body = JSON.parse(opts.body || "{}"); } catch (e) {}
     return handle(path, url, body);
   };
+})();
+
+/* 演示便利：进入“AI拆解”时自动填入示例原文 */
+(function () {
+  const SAMPLE = `订婚宴前一晚，林栖在未婚夫的电脑里看到了一份股权转让协议。
+受让人一栏写着她的名字，签字页却已经被人提前签好——笔迹是她的，可她从没见过这份文件。
+"明天宴会结束你签个字就行，都是走流程。"周屿从身后抱住她，语气温柔。
+林栖没有回头："转让的是我爸留给我的那百分之十二？"
+周屿的手僵了一下。
+第二天，宴会厅坐满了两家的亲友和公司高层。司仪请准新娘致辞，林栖接过话筒，先放了一段录音。
+录音里，周屿和他的合伙人在讨论怎么在婚后三个月内把林家的股份"合法地"转走。
+全场安静。周屿冲上台想抢话筒，林栖侧身让开，对台下说："今天不是订婚宴，是我接手公司的第一次股东沟通会。"
+她身后的大屏幕亮起：审计报告、资金流向、伪造签名的鉴定结论。
+三个月后，林栖坐进了父亲当年的办公室。桌上放着一封周屿的道歉信，她没拆，直接放进了碎纸机。`;
+  setInterval(() => {
+    const el = document.getElementById("raw-novel-text");
+    if (el && !el.value && el.offsetParent !== null && !el.dataset.demoFilled) {
+      el.value = SAMPLE; el.dataset.demoFilled = "1";
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }, 500);
 })();

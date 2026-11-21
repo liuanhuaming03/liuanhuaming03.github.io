@@ -95,3 +95,5 @@ footer.site{padding:36px 0 56px;color:var(--muted);font-size:14px;border-top:1px
   .flow li:not(:last-child)::after{content:"↓";right:auto;left:22px;top:auto;bottom:-18px;transform:none}
   .flow li{margin-bottom:22px}
 }
+.flow.story li{max-width:none;flex:1 1 210px}
+.flow.story li span{color:var(--ink);font-size:14px}

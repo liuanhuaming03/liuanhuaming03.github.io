@@ -3,24 +3,64 @@
 // ========================================
 // Step 1: AI 拆解
 // ========================================
+const REQUIRED_SPLIT_SECTIONS = [
+    "【一、世界观】",
+    "【二、核心梗】",
+    "【三、故事背景】",
+    "【四、故事梗概】",
+    "【五、一句话卖点】",
+    "【六、人物关系】",
+    "【七、人物小传】",
+    "【八、小说大纲】",
+];
+
+function inspectSplitResultStructure(text) {
+    const normalized = String(text || "");
+    const missingSections = REQUIRED_SPLIT_SECTIONS.filter((section) => !normalized.includes(section));
+    const chapterCount = (normalized.match(/(^|\n)第\s*([1-9][0-9]{0,2})\s*章[:：]?/g) || []).length;
+    return {
+        isValid: missingSections.length === 0 && chapterCount >= 10,
+        missingSections,
+        chapterCount,
+    };
+}
+
 async function splitNovelStep() {
     const rawText = getEl("raw-novel-text").value.trim();
     if (!rawText) return showError("请先粘贴原始小说正文");
-    showPageLoading("AI 正在拆解原文，生成标准化框架...");
+    const splitBtn = getEl("step1-split-btn");
+    if (splitBtn) splitBtn.disabled = true;
+    setTextareaBusy("raw-novel-text", "AI 正在拆解原文，生成标准化框架");
     try {
         const data = await postJSON("/api/pipeline/split", { text: rawText });
         workflowState.rawNovelText = rawText;
         workflowState.splitterResultText = data.split_result || data.result || "";
+        workflowState.originalOutlineText = workflowState.splitterResultText;
         getEl("input-outline-text").value = workflowState.splitterResultText;
-        switchToStep(2); showSuccess("拆解完成，请检查结果后进入改编工作流");
+        updateAllTextareaCounters();
+        const structureCheck = data.structure_check || inspectSplitResultStructure(workflowState.splitterResultText);
+        switchToStep(2);
+        if (!structureCheck.is_valid) {
+            const missingText = structureCheck.missing_sections?.length
+                ? `缺少：${structureCheck.missing_sections.join("、")}`
+                : "";
+            const chapterText = `识别到 ${structureCheck.chapter_count || 0} 章`;
+            const separator = missingText ? "；" : "";
+            showError(`拆解已返回，但格式不完整，${missingText}${separator}${chapterText}。请先检查后再进入 AI改编。`);
+            return;
+        }
+        showSuccess("拆解完成，请检查结果后进入改编工作流");
     } catch (err) { showError(err.message || "拆解失败"); }
-    finally { hidePageLoading(); }
+    finally {
+        clearTextareaBusy("raw-novel-text");
+        if (splitBtn) splitBtn.disabled = false;
+    }
 }
 
 function collectStep1DraftPayload() {
     const detail = workflowState.historicalReferenceDetail || {};
     return {
-        task_id: workflowState.currentTaskId || createClientTaskId(),
+        task_id: workflowState.currentTaskId || createClientTaskId("split"),
         title: inferStep1TaskTitle(),
         current_step: inferStep1CurrentStep(),
         input_mode: inferStep1InputMode(),
